@@ -15,7 +15,7 @@ import logging
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Query, Request
+from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File, Form, Query, Request
 from fastapi.responses import StreamingResponse, JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -130,7 +130,6 @@ def split_sentences_text(text: str) -> List[str]:
     if not text or not text.strip():
         return []
     import re
-    # Match sentence terminators for English and Indic scripts (. ! ? । ။ etc.)
     pattern = r'(?<=[.!?।|॥\n])\s+'
     raw_splits = re.split(pattern, text.strip())
     sentences = []
@@ -194,10 +193,11 @@ SAMPLE_PAGES = {
 
 
 # ==========================================
-# REST API Endpoints
+# REST API Router
 # ==========================================
+router = APIRouter()
 
-@app.get("/api/health")
+@router.get("/health")
 def health_check():
     """Vercel Edge Health & Capabilities check."""
     return {
@@ -210,19 +210,19 @@ def health_check():
     }
 
 
-@app.get("/api/state")
+@router.get("/state")
 def get_state():
     """Returns real-time telemetry and state."""
     return state.get_telemetry()
 
 
-@app.get("/api/events")
+@router.get("/events")
 def get_events(limit: int = 50):
     """Returns recent system and voice event logs."""
     return {"events": state.event_logs[-limit:]}
 
 
-@app.post("/api/config")
+@router.post("/config")
 def update_config(cfg: ConfigUpdate):
     """Updates device configuration (language, mode, volume)."""
     if cfg.preferred_language and cfg.preferred_language in config.SUPPORTED_LANGUAGES:
@@ -248,7 +248,7 @@ def update_config(cfg: ConfigUpdate):
     return state.get_telemetry()
 
 
-@app.post("/api/camera/toggle")
+@router.post("/camera/toggle")
 def toggle_camera():
     """Toggles camera on/off."""
     state.camera_enabled = not state.camera_enabled
@@ -256,39 +256,13 @@ def toggle_camera():
     return {"camera_enabled": state.camera_enabled}
 
 
-@app.get("/api/camera/stream")
+@router.get("/camera/stream")
 def camera_stream():
-    """Simulated MJPEG video stream placeholder for camera views."""
-    def generate_dummy_stream():
-        # Generate clean SVG-like JPEG frame
-        import numpy as np
-        frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        # Gradient background
-        for y in range(480):
-            frame[y, :] = (int(18 + y * 0.05), int(14 + y * 0.04), int(10 + y * 0.03))
-
-        # We encode single frame
-        import cv2
-        ret, buffer = cv2.imencode('.jpg', frame)
-        if ret:
-            frame_bytes = buffer.tobytes()
-            while True:
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-                time.sleep(1.0)
-
-    try:
-        import cv2
-        return StreamingResponse(
-            generate_dummy_stream(),
-            media_type="multipart/x-mixed-replace; boundary=frame"
-        )
-    except Exception:
-        # Fallback for lightweight environment
-        return JSONResponse({"status": "stream_standby", "detail": "Use browser webcam mode"})
+    """Simulated MJPEG stream."""
+    return JSONResponse({"status": "stream_standby", "detail": "Use browser webcam mode"})
 
 
-@app.get("/api/camera/snapshot")
+@router.get("/camera/snapshot")
 def camera_snapshot():
     """Returns sample capture snapshot."""
     test_img = os.path.join(BASE_DIR, "debug_cam_test.jpg")
@@ -297,7 +271,7 @@ def camera_snapshot():
     return JSONResponse({"detail": "Snapshot unavailable"}, status_code=404)
 
 
-@app.post("/api/translate")
+@router.post("/translate")
 def translate_text(req: TranslationRequest):
     """Performs instant text translation between supported languages."""
     try:
@@ -313,7 +287,7 @@ def translate_text(req: TranslationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/tts/synthesize")
+@router.get("/tts/synthesize")
 def synthesize_audio_endpoint(
     text: str = Query(..., min_length=1),
     lang: str = Query("en")
@@ -321,7 +295,6 @@ def synthesize_audio_endpoint(
     """Synthesizes text to speech audio stream (MP3) for in-browser playback."""
     tts_lang = config.SUPPORTED_LANGUAGES.get(lang, {}).get("tts", lang)
 
-    # gTTS synthesis
     try:
         from gtts import gTTS
         tts = gTTS(text=text, lang=tts_lang, slow=False)
@@ -341,7 +314,7 @@ def synthesize_audio_endpoint(
         raise HTTPException(status_code=500, detail=f"TTS synthesis engine unavailable: {e}")
 
 
-@app.post("/api/ocr/custom")
+@router.post("/ocr/custom")
 def ocr_custom_text(
     sample_key: Optional[str] = Form(None),
     custom_text: Optional[str] = Form(None),
@@ -370,8 +343,8 @@ def ocr_custom_text(
     }
 
 
-@app.post("/api/ocr/image")
-@app.post("/api/camera/scan")
+@router.post("/ocr/image")
+@router.post("/camera/scan")
 async def scan_and_read_image(
     file: Optional[UploadFile] = File(None),
     image_base64: Optional[str] = Form(None),
@@ -388,13 +361,11 @@ async def scan_and_read_image(
     raw_text = ""
     target_language = target_lang or state.preferred_language
 
-    # 1. Check if user provided an image file or base64 frame
     if file:
         try:
             from PIL import Image
             contents = await file.read()
             img = Image.open(io.BytesIO(contents))
-            # Try pytesseract if available
             try:
                 import pytesseract
                 raw_text = pytesseract.image_to_string(img)
@@ -406,7 +377,6 @@ async def scan_and_read_image(
     elif image_base64:
         try:
             from PIL import Image
-            # Strip data URL prefix if present
             if "," in image_base64:
                 image_base64 = image_base64.split(",", 1)[1]
             img_bytes = base64.b64decode(image_base64)
@@ -419,7 +389,6 @@ async def scan_and_read_image(
         except Exception as e:
             logger.warning(f"Failed to process base64 image: {e}")
 
-    # Fallback to rich sample if no OCR text extracted from blank surface
     if not raw_text or len(raw_text.strip()) < 5:
         chosen_sample = sample_key if sample_key in SAMPLE_PAGES else state.preferred_language
         raw_text = SAMPLE_PAGES.get(chosen_sample, SAMPLE_PAGES["en"])
@@ -427,24 +396,20 @@ async def scan_and_read_image(
     else:
         state.log_event("OCR", f"Extracted {len(raw_text)} characters from page image.")
 
-    # 2. Script / Language Detection
     det_lang = state.lang_detector.detect_language(raw_text)
     state.last_detected_lang = det_lang["lang"]
-    state.log_event("LANG", f"Detected: {det_lang['name']} ({det_lang['lang']}) - Confidence: {det_lang['confidence']*100:.1f}%")
+    state.log_event("LANG", f"Detected: {det_lang['name']} ({det_lang['lang']})")
 
-    # 3. Book Memory & Fingerprint
     try:
         book_info = state.memory.identify_or_create_book(raw_text, detected_lang=det_lang["lang"])
         state.current_book_id = book_info["book_id"]
         state.current_page = book_info["last_page"]
-    except Exception as e:
+    except Exception:
         state.current_book_id = f"Book-{int(time.time()) % 10000}"
         state.current_page = 1
 
     state.total_pages_read += 1
-    state.log_event("MEMORY", f"Book: {state.current_book_id} (Page {state.current_page})")
 
-    # 4. Translation if in Preferred Mode
     speech_text = raw_text
     reading_lang = det_lang["lang"]
 
@@ -459,7 +424,6 @@ async def scan_and_read_image(
         speech_text = trans_res.get("translated_text", raw_text)
         reading_lang = target_language
 
-    # 5. Sentence Segmentation
     sentences = split_sentences_text(speech_text)
     state.current_sentences = sentences
     state.current_sentence_idx = 1 if sentences else 0
@@ -479,7 +443,7 @@ async def scan_and_read_image(
     }
 
 
-@app.post("/api/playback/{action}")
+@router.post("/playback/{action}")
 def playback_control(action: str):
     """Controls TTS audio playback queue state."""
     action = action.lower()
@@ -515,7 +479,7 @@ def playback_control(action: str):
         idx = max(0, state.current_sentence_idx - 1)
         if state.current_sentences:
             state.active_speaking_sentence = state.current_sentences[idx]
-        state.log_event("PLAYBACK", "Repeating current sentence.")
+        state.log_event("PLAYBACK", "Repeating active sentence.")
         return {"status": "REPEATING", "current_sentence_idx": state.current_sentence_idx, "active_sentence": state.active_speaking_sentence}
 
     elif action == "prev":
@@ -530,12 +494,11 @@ def playback_control(action: str):
         raise HTTPException(status_code=400, detail=f"Unknown playback action: {action}")
 
 
-@app.post("/api/voice/simulate")
+@router.post("/voice/simulate")
 def simulate_voice(req: VoiceSimulationRequest):
     """Simulates spoken utterances and triggers the voice intent parser."""
     utterance = req.utterance.strip().lower()
 
-    # Voice Intent Classification
     cmd = "unknown"
     action_result = "No matching intent found."
 
@@ -580,7 +543,7 @@ def simulate_voice(req: VoiceSimulationRequest):
     }
 
 
-@app.get("/api/books")
+@router.get("/books")
 def list_books():
     """Lists saved books in persistent memory storage."""
     books = []
@@ -599,10 +562,9 @@ def list_books():
                         else:
                             data["created_str"] = "N/A"
                         books.append(data)
-                except Exception as e:
-                    logger.warning(f"Failed to read book record {fname}: {e}")
+                except Exception:
+                    pass
 
-    # If empty on serverless start, provide sample demo books
     if not books:
         books = [
             {
@@ -630,9 +592,8 @@ def list_books():
     }
 
 
-@app.get("/api/books/{book_id}")
+@router.get("/books/{book_id}")
 def get_book_details(book_id: str):
-    """Retrieves metadata and reading history for a specific book."""
     fpath = os.path.join(config.BOOKS_DIR, f"{book_id}.json")
     if os.path.exists(fpath):
         with open(fpath, "r", encoding="utf-8") as f:
@@ -645,9 +606,8 @@ def get_book_details(book_id: str):
     }
 
 
-@app.delete("/api/books/{book_id}")
+@router.delete("/books/{book_id}")
 def delete_book(book_id: str):
-    """Deletes a book record from memory."""
     fpath = os.path.join(config.BOOKS_DIR, f"{book_id}.json")
     if os.path.exists(fpath):
         os.remove(fpath)
@@ -656,9 +616,8 @@ def delete_book(book_id: str):
     return {"success": True, "message": f"Book record removed from session"}
 
 
-@app.get("/api/captures")
+@router.get("/captures")
 def list_captures(limit: int = 30):
-    """Lists historical captured page images."""
     captures = []
     cap_dir = config.CAPTURES_DIR
     if os.path.exists(cap_dir):
@@ -682,19 +641,17 @@ def list_captures(limit: int = 30):
     return {"total": len(captures), "captures": captures}
 
 
-@app.get("/api/captures/file")
+@router.get("/captures/file")
 def get_capture_file(path: str = Query(...)):
-    """Serves a captured image securely."""
     if os.path.exists(path):
         return FileResponse(path)
-    # Default fallback
     test_img = os.path.join(BASE_DIR, "debug_cam_test.jpg")
     if os.path.exists(test_img):
         return FileResponse(test_img)
     raise HTTPException(status_code=404, detail="Image not found")
 
 
-@app.get("/api/diagnostics/run")
+@router.get("/diagnostics/run")
 def run_diagnostics():
     """Runs automated cloud and subsystem diagnostics."""
     state.log_event("DIAGNOSTICS", "Running full subsystem diagnostic suite...")
@@ -739,18 +696,25 @@ def run_diagnostics():
     }
 
 
-# Mount static assets if running locally or serving full app
-web_dir = os.path.join(BASE_DIR, "web")
-if os.path.exists(web_dir):
-    app.mount("/static", StaticFiles(directory=web_dir), name="static")
+# Include Router with and without /api prefix for bulletproof Vercel routing
+app.include_router(router, prefix="/api")
+app.include_router(router)
+
+# Mount static assets
+for folder in ["public", "web"]:
+    static_dir = os.path.join(BASE_DIR, folder)
+    if os.path.exists(static_dir):
+        app.mount(f"/static", StaticFiles(directory=static_dir), name=f"static_{folder}")
+        break
 
 @app.get("/", response_class=HTMLResponse)
 def serve_root():
-    """Serves index.html from web directory."""
-    index_file = os.path.join(web_dir, "index.html")
-    if os.path.exists(index_file):
-        with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    """Serves index.html from public or web directory."""
+    for folder in ["public", "web"]:
+        index_file = os.path.join(BASE_DIR, folder, "index.html")
+        if os.path.exists(index_file):
+            with open(index_file, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
     return HTMLResponse("<h2>VisionVoice is loading...</h2>")
 
 
