@@ -1,11 +1,18 @@
 /**
  * VisionVoice — Web Command Center & Real-Time Telemetry Frontend Logic.
+ * Full Website Application with WebRTC Webcam, Voice Orb, Karaoke Subtitles & Multi-Speed Audio.
  */
 
 // Global State
 let currentTelemetry = null;
 let lastLogId = 0;
 let isVisualizerRunning = false;
+let webcamStream = null;
+let isWebcamActive = true;
+let isMicListening = false;
+let speechRecognition = null;
+let localBooksCache = [];
+let playbackSpeed = 1.0;
 
 // DOM Elements
 const statusBadge = document.getElementById('status-badge');
@@ -14,6 +21,9 @@ const globalLangSelect = document.getElementById('global-lang-select');
 const globalModeSelect = document.getElementById('global-mode-select');
 const uptimeDisplay = document.getElementById('uptime-display');
 const cameraFeed = document.getElementById('live-camera-feed');
+const webcamVideo = document.getElementById('browser-webcam-video');
+const snapshotCanvas = document.getElementById('snapshot-canvas');
+const camModeBadge = document.getElementById('cam-mode-badge');
 const hudGuidanceText = document.getElementById('hud-guidance-text');
 const hudAlignmentStatus = document.getElementById('hud-alignment-status');
 const karaokeText = document.getElementById('karaoke-text');
@@ -26,23 +36,36 @@ const volumeLabel = document.getElementById('volume-label');
 const btnPlayPause = document.getElementById('btn-ctrl-playpause');
 const audioWaveformCanvas = document.getElementById('audio-waveform');
 const logsConsole = document.getElementById('system-logs-console');
+const cameraDropzone = document.getElementById('camera-dropzone');
+const voiceOrb = document.getElementById('voice-assistant-orb');
+const voiceStatusBanner = document.getElementById('voice-status-banner');
 
 // Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   initTabNavigation();
+  initHeroActions();
+  initWebcam();
+  initPhotoUpload();
   initPlaybackControls();
+  initSpeedControls();
   initStudio();
   initVoiceSimulator();
   initDiagnostics();
   initKeyboardShortcuts();
   initWaveformVisualizer();
 
-  // Start periodic polling loops
+  // Load local books cache
+  try {
+    const saved = localStorage.getItem('visionvoice_books');
+    if (saved) localBooksCache = JSON.parse(saved);
+  } catch (e) {}
+
+  // Periodic telemetry polling
   pollTelemetry();
-  setInterval(pollTelemetry, 650);
+  setInterval(pollTelemetry, 850);
 
   pollLogs();
-  setInterval(pollLogs, 1200);
+  setInterval(pollLogs, 1500);
 
   // Initial loads for library and gallery
   loadBooks();
@@ -65,31 +88,212 @@ function showToast(message, type = 'info') {
   }, 3500);
 }
 
-// 1. Tab Navigation
-function initTabNavigation() {
+// 1. Tab Navigation & Hero Quick Actions
+function switchTab(targetId) {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
+  tabButtons.forEach(b => {
+    if (b.getAttribute('data-tab') === targetId) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+
+  tabContents.forEach(c => {
+    if (c.id === targetId) {
+      c.classList.add('active');
+    } else {
+      c.classList.remove('active');
+    }
+  });
+
+  if (targetId === 'tab-library') loadBooks();
+  if (targetId === 'tab-gallery') loadGallery();
+}
+
+function initTabNavigation() {
+  const tabButtons = document.querySelectorAll('.tab-btn');
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.getAttribute('data-tab');
-      tabButtons.forEach(b => b.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-
-      btn.classList.add('active');
-      const targetContent = document.getElementById(targetId);
-      if (targetContent) {
-        targetContent.classList.add('active');
-      }
-
-      // Refresh specific tab contents on activation
-      if (targetId === 'tab-library') loadBooks();
-      if (targetId === 'tab-gallery') loadGallery();
+      switchTab(targetId);
     });
   });
+
+  const brandBtn = document.getElementById('nav-brand-btn');
+  if (brandBtn) {
+    brandBtn.addEventListener('click', () => {
+      switchTab('tab-station');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 }
 
-// In-Browser Audio Player
+function initHeroActions() {
+  const heroBtnScan = document.getElementById('hero-btn-scan');
+  const heroBtnUpload = document.getElementById('hero-btn-upload');
+  const heroBtnVoice = document.getElementById('hero-btn-voice');
+  const heroBtnStudio = document.getElementById('hero-btn-studio');
+  const fileInput = document.getElementById('book-image-upload');
+
+  if (heroBtnScan) {
+    heroBtnScan.addEventListener('click', () => {
+      switchTab('tab-station');
+      triggerScanAndRead();
+    });
+  }
+
+  if (heroBtnUpload && fileInput) {
+    heroBtnUpload.addEventListener('click', () => {
+      switchTab('tab-station');
+      fileInput.click();
+    });
+  }
+
+  if (heroBtnVoice) {
+    heroBtnVoice.addEventListener('click', () => {
+      switchTab('tab-voice');
+      const btnMic = document.getElementById('btn-toggle-mic');
+      if (btnMic && !isMicListening) btnMic.click();
+    });
+  }
+
+  if (heroBtnStudio) {
+    heroBtnStudio.addEventListener('click', () => {
+      switchTab('tab-studio');
+    });
+  }
+}
+
+// 2. Browser Webcam Integration
+async function initWebcam() {
+  const btnToggleWebcam = document.getElementById('btn-toggle-webcam');
+
+  async function startWebcam() {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        webcamStream = stream;
+        webcamVideo.srcObject = stream;
+        webcamVideo.style.display = 'block';
+        if (cameraFeed) cameraFeed.style.display = 'none';
+        isWebcamActive = true;
+        if (camModeBadge) camModeBadge.textContent = 'DEVICE WEBCAM';
+        if (hudAlignmentStatus) hudAlignmentStatus.textContent = 'Live Webcam Active';
+        showToast('Device webcam connected successfully', 'success');
+      }
+    } catch (err) {
+      console.warn('Webcam permission denied or unavailable, using cloud sample feed:', err);
+      fallbackToSampleFeed();
+    }
+  }
+
+  function fallbackToSampleFeed() {
+    isWebcamActive = false;
+    if (webcamStream) {
+      webcamStream.getTracks().forEach(t => t.stop());
+      webcamStream = null;
+    }
+    webcamVideo.style.display = 'none';
+    if (cameraFeed) {
+      cameraFeed.style.display = 'block';
+      cameraFeed.src = `/api/camera/snapshot?t=${Date.now()}`;
+    }
+    if (camModeBadge) camModeBadge.textContent = 'CLOUD FEED';
+    if (hudAlignmentStatus) hudAlignmentStatus.textContent = 'Sample Feed Active';
+  }
+
+  if (btnToggleWebcam) {
+    btnToggleWebcam.addEventListener('click', () => {
+      if (isWebcamActive) {
+        fallbackToSampleFeed();
+        showToast('Switched to Cloud Sample Feed', 'info');
+      } else {
+        startWebcam();
+      }
+    });
+  }
+
+  // Attempt to start webcam automatically on first load
+  startWebcam();
+}
+
+// 3. Photo Upload & Drag-and-Drop
+function initPhotoUpload() {
+  const fileInput = document.getElementById('book-image-upload');
+  const btnUpload = document.getElementById('btn-upload-photo');
+  const dropzone = cameraDropzone;
+
+  if (btnUpload && fileInput) {
+    btnUpload.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        await processUploadedFile(file);
+      }
+    });
+  }
+
+  if (dropzone) {
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag-over');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('drag-over');
+    });
+
+    dropzone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        await processUploadedFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+}
+
+async function processUploadedFile(file) {
+  const btnScan = document.getElementById('btn-scan-read');
+  btnScan.disabled = true;
+  btnScan.innerHTML = '<span>⏳</span> Processing Uploaded Image...';
+  if (cameraDropzone) cameraDropzone.classList.add('scanning');
+  showToast(`Uploading ${file.name} for OCR scanning...`, 'info');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('target_lang', globalLangSelect.value);
+
+    const res = await fetch('/api/ocr/image', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      showToast(`Scan complete: ${data.sentence_count} sentences extracted (${data.detected_language.name})`, 'success');
+      handleScanResult(data);
+    } else {
+      showToast(data.detail || 'Failed to scan uploaded image', 'error');
+    }
+  } catch (err) {
+    showToast('Upload OCR failed: ' + err.message, 'error');
+  } finally {
+    btnScan.disabled = false;
+    btnScan.innerHTML = '<span>🔘</span> SCAN & READ BOOK [SPACE]';
+    if (cameraDropzone) cameraDropzone.classList.remove('scanning');
+  }
+}
+
+// 4. In-Browser Audio Player & Multi-Speed Control
 let browserAudio = null;
 let lastSpokenSentence = "";
 let availableBrowserVoices = [];
@@ -100,12 +304,23 @@ if (typeof window !== 'undefined' && window.speechSynthesis) {
   };
 }
 
+function initSpeedControls() {
+  const speedChips = document.querySelectorAll('.speed-chip');
+  speedChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      speedChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      playbackSpeed = parseFloat(chip.getAttribute('data-speed') || '1.0');
+      showToast(`Playback speed: ${playbackSpeed}x`, 'info');
+    });
+  });
+}
+
 function playSpeechInBrowser(text, lang = 'en', force = false) {
   if (!text || !text.trim()) return;
   if (!force && text === lastSpokenSentence) return;
   lastSpokenSentence = text;
 
-  // Stop active playback
   stopBrowserSpeech();
 
   const vol = Math.max(0.1, Math.min(1.0, parseInt(volumeSlider.value || 80, 10) / 100));
@@ -114,11 +329,11 @@ function playSpeechInBrowser(text, lang = 'en', force = false) {
   browserAudio = new Audio();
   browserAudio.src = audioUrl;
   browserAudio.volume = vol;
+  browserAudio.playbackRate = playbackSpeed;
 
   const playPromise = browserAudio.play();
   if (playPromise !== undefined) {
-    playPromise.catch(err => {
-      console.warn("Audio element play blocked by browser, speaking via Web Speech API:", err);
+    playPromise.catch(() => {
       speakViaWebSpeechAPI(text, lang, vol);
     });
   }
@@ -139,7 +354,7 @@ function speakViaWebSpeechAPI(text, lang = 'en', volume = 0.8) {
   };
   utter.lang = langMap[lang] || 'en-US';
   utter.volume = volume;
-  utter.rate = 1.0;
+  utter.rate = playbackSpeed;
   utter.pitch = 1.0;
 
   if (availableBrowserVoices.length === 0) {
@@ -168,7 +383,7 @@ function stopBrowserSpeech() {
   }
 }
 
-// 2. Real-Time Telemetry Polling
+// 5. Real-Time Telemetry Polling
 async function pollTelemetry() {
   try {
     const res = await fetch('/api/state');
@@ -176,7 +391,7 @@ async function pollTelemetry() {
     const data = await res.json();
     currentTelemetry = data;
 
-    // Update Status Badge
+    // Status Badge
     statusText.textContent = data.status;
     statusBadge.className = 'status-pill';
     if (data.status === 'READY') {
@@ -187,21 +402,21 @@ async function pollTelemetry() {
       statusBadge.classList.add('status-error');
     }
 
-    // Update Camera Enabled State & Overlays
+    // Camera Overlay
     const cameraOffOverlay = document.getElementById('camera-off-overlay');
     const btnToggleCam = document.getElementById('btn-toggle-camera');
     if (data.camera_enabled === false) {
       if (cameraOffOverlay) cameraOffOverlay.style.display = 'flex';
-      if (btnToggleCam) btnToggleCam.innerHTML = '<span>📷</span> Turn On Camera';
+      if (btnToggleCam) btnToggleCam.innerHTML = '<span>📷</span> Turn On';
     } else {
       if (cameraOffOverlay) cameraOffOverlay.style.display = 'none';
-      if (btnToggleCam) btnToggleCam.innerHTML = '<span>📷</span> Turn Off Camera';
+      if (btnToggleCam) btnToggleCam.innerHTML = '<span>📷</span> Turn Off';
     }
 
-    // Update Uptime
+    // Uptime
     uptimeDisplay.textContent = data.uptime;
 
-    // Update Language & Mode Selectors if not focused
+    // Selectors
     if (document.activeElement !== globalLangSelect) {
       globalLangSelect.value = data.preferred_language;
     }
@@ -209,28 +424,30 @@ async function pollTelemetry() {
       globalModeSelect.value = data.reading_mode;
     }
 
-    // Update Guidance HUD
+    // Guidance HUD
     if (data.last_guidance) {
       hudGuidanceText.textContent = data.last_guidance;
     }
 
-    // Update Book & Sentence State
+    // Book & Active Sentence
     readingBookPill.textContent = `Book: ${data.current_book_id || 'None'} (p.${data.current_page})`;
 
     if (data.active_speaking_sentence) {
       karaokeText.textContent = data.active_speaking_sentence;
       karaokeText.classList.remove('empty-state');
-      // Trigger synchronized browser audio
       playSpeechInBrowser(data.active_speaking_sentence, data.preferred_language);
     } else if (!data.is_reading && data.total_sentences === 0) {
-      karaokeText.textContent = 'Place a book in the camera view and click "Scan & Read Book" to begin reading.';
+      karaokeText.textContent = 'Place a book in the camera view or upload an image and click "Scan & Read Book" to begin reading.';
       karaokeText.classList.add('empty-state');
     }
 
     karaokeIndex.textContent = `Sentence: ${data.current_sentence_idx} / ${data.total_sentences}`;
     sentenceCountBadge.textContent = `${data.total_sentences} sentences`;
 
-    // Play/Pause button icon
+    // Highlight active sentence item
+    updateActiveSentenceHighlight(data.current_sentence_idx);
+
+    // Play/Pause icon
     if (data.is_reading && data.status !== 'PAUSED') {
       btnPlayPause.textContent = '⏸';
       btnPlayPause.title = 'Pause Reading';
@@ -239,20 +456,30 @@ async function pollTelemetry() {
       btnPlayPause.title = 'Resume Reading';
     }
 
-    // Update Volume if not focused
+    // Volume
     if (document.activeElement !== volumeSlider) {
       volumeSlider.value = data.volume;
       volumeLabel.textContent = `${data.volume}%`;
     }
 
   } catch (err) {
-    console.warn('Telemetry poll failed:', err);
+    console.warn('Telemetry poll note:', err);
   }
 }
 
-// 3. Playback Controls & Listeners
+function updateActiveSentenceHighlight(activeIdx) {
+  const items = document.querySelectorAll('.sentence-item');
+  items.forEach((item, idx) => {
+    if (idx + 1 === activeIdx) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
+
+// 6. Playback Controls & Listeners
 function initPlaybackControls() {
-  // Global Config Changes
   globalLangSelect.addEventListener('change', async () => {
     const lang = globalLangSelect.value;
     await fetch('/api/config', {
@@ -273,7 +500,6 @@ function initPlaybackControls() {
     showToast(`Reading mode set to ${mode.toUpperCase()}`, 'success');
   });
 
-  // Volume Slider
   volumeSlider.addEventListener('input', () => {
     volumeLabel.textContent = `${volumeSlider.value}%`;
   });
@@ -286,7 +512,6 @@ function initPlaybackControls() {
     });
   });
 
-  // Camera Toggle Buttons
   const btnToggleCam = document.getElementById('btn-toggle-camera');
   const btnTurnOnCam = document.getElementById('btn-turn-on-camera');
 
@@ -295,7 +520,7 @@ function initPlaybackControls() {
       const res = await fetch('/api/camera/toggle', { method: 'POST' });
       const data = await res.json();
       const isEnabled = data.camera_enabled;
-      showToast(isEnabled ? 'Camera turned ON' : 'Camera turned OFF (saving CPU)', 'info');
+      showToast(isEnabled ? 'Camera turned ON' : 'Camera turned OFF', 'info');
       pollTelemetry();
     } catch (err) {
       showToast('Camera toggle failed: ' + err.message, 'error');
@@ -305,7 +530,6 @@ function initPlaybackControls() {
   if (btnToggleCam) btnToggleCam.addEventListener('click', toggleCameraState);
   if (btnTurnOnCam) btnTurnOnCam.addEventListener('click', toggleCameraState);
 
-  // Action Buttons
   const btnScan = document.getElementById('btn-scan-read');
   btnScan.addEventListener('click', triggerScanAndRead);
 
@@ -333,8 +557,8 @@ function initPlaybackControls() {
 
   document.getElementById('btn-ctrl-repeat').addEventListener('click', async () => {
     if (currentTelemetry && currentTelemetry.active_speaking_sentence) {
-      lastSpokenSentence = ""; // Reset to allow repeating same sentence
-      playSpeechInBrowser(currentTelemetry.active_speaking_sentence, currentTelemetry.preferred_language);
+      lastSpokenSentence = "";
+      playSpeechInBrowser(currentTelemetry.active_speaking_sentence, currentTelemetry.preferred_language, true);
     }
     await fetch('/api/playback/repeat', { method: 'POST' });
   });
@@ -345,24 +569,46 @@ function initPlaybackControls() {
   });
 
   document.getElementById('btn-refresh-stream').addEventListener('click', () => {
-    cameraFeed.src = `/api/camera/stream?t=${Date.now()}`;
-    showToast('Camera feed re-synchronized');
+    if (cameraFeed) cameraFeed.src = `/api/camera/snapshot?t=${Date.now()}`;
+    showToast('Feed refreshed');
   });
 }
 
-// Trigger Scan and Read Flow
+// 7. Trigger Scan Flow (From Webcam or Cloud Sample)
 async function triggerScanAndRead() {
   const btnScan = document.getElementById('btn-scan-read');
   btnScan.disabled = true;
   btnScan.innerHTML = '<span>⏳</span> Processing Scan & OCR...';
+  if (cameraDropzone) cameraDropzone.classList.add('scanning');
   showToast('Scanning page & extracting text...', 'info');
 
   try {
-    const res = await fetch('/api/camera/scan', { method: 'POST' });
+    let base64Frame = null;
+
+    if (isWebcamActive && webcamVideo && webcamVideo.videoWidth) {
+      snapshotCanvas.width = webcamVideo.videoWidth;
+      snapshotCanvas.height = webcamVideo.videoHeight;
+      const ctx = snapshotCanvas.getContext('2d');
+      ctx.drawImage(webcamVideo, 0, 0);
+      base64Frame = snapshotCanvas.toDataURL('image/jpeg', 0.85);
+    }
+
+    const formData = new FormData();
+    if (base64Frame) {
+      formData.append('image_base64', base64Frame);
+    }
+    formData.append('sample_key', globalLangSelect.value);
+    formData.append('target_lang', globalLangSelect.value);
+
+    const res = await fetch('/api/camera/scan', {
+      method: 'POST',
+      body: formData
+    });
     const data = await res.json();
+
     if (res.ok && data.success) {
       showToast(`Extracted ${data.sentence_count} sentences (${data.detected_language.name})`, 'success');
-      renderSentenceList(data.sentences);
+      handleScanResult(data);
     } else {
       showToast(data.detail || 'Scan failed', 'error');
     }
@@ -371,10 +617,38 @@ async function triggerScanAndRead() {
   } finally {
     btnScan.disabled = false;
     btnScan.innerHTML = '<span>🔘</span> SCAN & READ BOOK [SPACE]';
+    if (cameraDropzone) cameraDropzone.classList.remove('scanning');
   }
 }
 
-// Render Sentence Breakdown List
+function handleScanResult(data) {
+  renderSentenceList(data.sentences);
+
+  const bookRecord = {
+    book_id: data.book_id,
+    detected_lang: data.detected_language.lang,
+    last_page: data.page,
+    last_sentence_idx: 1,
+    sample_words: (data.original_text || '').split(' ').slice(0, 8),
+    created_str: new Date().toLocaleString()
+  };
+
+  const existingIdx = localBooksCache.findIndex(b => b.book_id === data.book_id);
+  if (existingIdx >= 0) {
+    localBooksCache[existingIdx] = bookRecord;
+  } else {
+    localBooksCache.unshift(bookRecord);
+  }
+
+  try {
+    localStorage.setItem('visionvoice_books', JSON.stringify(localBooksCache));
+  } catch (e) {}
+
+  if (data.sentences && data.sentences.length > 0) {
+    playSpeechInBrowser(data.sentences[0], data.reading_language, true);
+  }
+}
+
 function renderSentenceList(sentences) {
   sentenceFlowList.innerHTML = '';
   if (!sentences || sentences.length === 0) {
@@ -384,23 +658,22 @@ function renderSentenceList(sentences) {
 
   sentences.forEach((s, idx) => {
     const item = document.createElement('div');
-    item.className = 'sentence-item';
+    item.className = 'sentence-item' + (idx === 0 ? ' active' : '');
     item.innerHTML = `
       <span class="sentence-num">[${idx + 1}]</span>
       <span style="flex: 1;">${s}</span>
+      <span style="font-size: 0.75rem; color: var(--accent-cyan); opacity: 0.8;">🔊</span>
     `;
-    item.addEventListener('click', async () => {
-      await fetch(`/api/ocr/custom`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ custom_text: s, target_lang: globalLangSelect.value })
-      });
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('active'));
+      item.classList.add('active');
+      playSpeechInBrowser(s, globalLangSelect.value, true);
     });
     sentenceFlowList.appendChild(item);
   });
 }
 
-// 4. Multilingual Studio
+// 8. Multilingual Studio
 function initStudio() {
   const sampleBtns = document.querySelectorAll('.sample-btn');
   const inputText = document.getElementById('studio-input-text');
@@ -419,7 +692,6 @@ function initStudio() {
     ml: "വിഷൻ വോയ്സ് എന്നത് പുസ്തകങ്ങൾ എളുപ്പത്തിൽ വായിക്കാൻ സഹായിക്കുന്ന ഒരു സ്മാർട്ട് വായനാ സഹായിയാണ്."
   };
 
-  // Sample Click
   sampleBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const code = btn.getAttribute('data-sample');
@@ -465,12 +737,12 @@ function initStudio() {
     const text = translatedText.value.trim();
     if (!text) return;
     const target = targetSelect.value;
-    playSpeechInBrowser(text, target);
+    playSpeechInBrowser(text, target, true);
     showToast(`Playing speech in ${target.toUpperCase()}`, 'success');
   });
 }
 
-// 5. Book Memory Library
+// 9. Book Memory Library
 async function loadBooks() {
   const container = document.getElementById('books-cards-container');
   try {
@@ -478,14 +750,24 @@ async function loadBooks() {
     const data = await res.json();
     container.innerHTML = '';
 
-    if (!data.books || data.books.length === 0) {
-      container.innerHTML = '<div style="color: var(--text-dim); padding: 1rem;">No saved books found in memory. Scan a book to create persistent bookmarks!</div>';
+    const allBooks = (data.books || []).concat(localBooksCache);
+    const uniqueBooks = [];
+    const seenIds = new Set();
+    for (const b of allBooks) {
+      if (!seenIds.has(b.book_id)) {
+        seenIds.add(b.book_id);
+        uniqueBooks.push(b);
+      }
+    }
+
+    if (uniqueBooks.length === 0) {
+      container.innerHTML = '<div style="color: var(--text-dim); padding: 1rem;">No saved books found. Scan a book to create persistent bookmarks!</div>';
       return;
     }
 
-    data.books.forEach(b => {
+    uniqueBooks.forEach(b => {
       const card = document.createElement('div');
-      card.className = 'book-card' + (b.book_id === data.active_book_id ? ' active-book' : '');
+      card.className = 'book-card' + (b.book_id === (currentTelemetry ? currentTelemetry.current_book_id : '') ? ' active-book' : '');
 
       const words = (b.sample_words || []).slice(0, 6).map(w => `<span class="keyword-pill">${w}</span>`).join('');
 
@@ -507,7 +789,7 @@ async function loadBooks() {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
-          <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">${b.created_str || ''}</span>
+          <button class="btn btn-secondary btn-resume-book" data-id="${b.book_id}" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; color: var(--accent-cyan);">Resume 📖</button>
           <button class="btn btn-secondary btn-delete-book" data-id="${b.book_id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--accent-rose);">Delete</button>
         </div>
       `;
@@ -515,16 +797,28 @@ async function loadBooks() {
       container.appendChild(card);
     });
 
-    // Bind delete buttons
+    // Delete buttons
     document.querySelectorAll('.btn-delete-book').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = btn.getAttribute('data-id');
-        if (confirm(`Delete book record ${id}?`)) {
-          await fetch(`/api/books/${id}`, { method: 'DELETE' });
-          showToast(`Book ${id} deleted`, 'info');
-          loadBooks();
-        }
+        localBooksCache = localBooksCache.filter(b => b.book_id !== id);
+        try {
+          localStorage.setItem('visionvoice_books', JSON.stringify(localBooksCache));
+        } catch (e) {}
+        await fetch(`/api/books/${id}`, { method: 'DELETE' });
+        showToast(`Book ${id} deleted`, 'info');
+        loadBooks();
+      });
+    });
+
+    // Resume buttons
+    document.querySelectorAll('.btn-resume-book').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        switchTab('tab-station');
+        showToast(`Resumed book: ${id}`, 'success');
       });
     });
 
@@ -533,7 +827,7 @@ async function loadBooks() {
   }
 }
 
-// 6. Page Capture Gallery
+// 10. Page Capture Gallery
 async function loadGallery() {
   const container = document.getElementById('gallery-container');
   try {
@@ -556,9 +850,7 @@ async function loadGallery() {
           <span>${cap.size_kb} KB</span>
         </div>
       `;
-      item.addEventListener('click', () => {
-        window.open(cap.url, '_blank');
-      });
+      item.addEventListener('click', () => window.open(cap.url, '_blank'));
       container.appendChild(item);
     });
 
@@ -567,10 +859,13 @@ async function loadGallery() {
   }
 }
 
-// 7. Voice Simulator & Event Logs
+// 11. Voice Assistant Orb & Real Browser Mic Input
 function initVoiceSimulator() {
   const simInput = document.getElementById('voice-sim-input');
   const btnSim = document.getElementById('btn-sim-voice');
+  const btnMic = document.getElementById('btn-toggle-mic');
+  const micIcon = document.getElementById('mic-icon');
+  const micStatusText = document.getElementById('mic-status-text');
   const chips = document.querySelectorAll('.voice-chip');
 
   async function sendVoiceSim(utterance) {
@@ -584,11 +879,11 @@ function initVoiceSimulator() {
       const data = await res.json();
       showToast(`Parsed: [${data.parsed_command}] -> ${data.action_result}`, 'success');
 
-      // Spoken feedback in browser
       if (data.parsed_command === 'wake_word') {
-        playSpeechInBrowser("VisionVoice is ready. What would you like to read?", globalLangSelect.value);
+        playSpeechInBrowser("VisionVoice is ready. What would you like to read?", globalLangSelect.value, true);
       } else if (data.parsed_command === 'start_reading') {
-        playSpeechInBrowser("Starting page capture and reading.", globalLangSelect.value);
+        playSpeechInBrowser("Starting page capture and reading.", globalLangSelect.value, true);
+        triggerScanAndRead();
       } else if (data.parsed_command === 'stop_reading') {
         stopBrowserSpeech();
       }
@@ -599,6 +894,62 @@ function initVoiceSimulator() {
     }
   }
 
+  // Real Browser Microphone Listening
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRec && btnMic) {
+    speechRecognition = new SpeechRec();
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = false;
+    speechRecognition.lang = 'en-US';
+
+    speechRecognition.onresult = (e) => {
+      const transcript = e.results[e.results.length - 1][0].transcript.trim();
+      showToast(`Heard: "${transcript}"`, 'info');
+      sendVoiceSim(transcript);
+    };
+
+    speechRecognition.onerror = (e) => {
+      console.warn('Speech recognition event:', e.error);
+    };
+
+    speechRecognition.onend = () => {
+      if (isMicListening) {
+        try { speechRecognition.start(); } catch (e) {}
+      }
+    };
+
+    function toggleMic() {
+      if (!isMicListening) {
+        try {
+          speechRecognition.start();
+          isMicListening = true;
+          if (micIcon) micIcon.textContent = '🔴';
+          if (micStatusText) micStatusText.textContent = 'Listening (Mic Active)';
+          if (voiceOrb) voiceOrb.classList.add('listening');
+          if (voiceStatusBanner) voiceStatusBanner.textContent = 'Listening... Say "Hey VisionVoice" or "Start reading"';
+          showToast('Microphone activated. Say "Hey VisionVoice" or "Start reading"', 'success');
+        } catch (e) {
+          showToast('Mic start error: ' + e.message, 'error');
+        }
+      } else {
+        isMicListening = false;
+        speechRecognition.stop();
+        if (micIcon) micIcon.textContent = '🎙️';
+        if (micStatusText) micStatusText.textContent = 'Start Mic Listening';
+        if (voiceOrb) voiceOrb.classList.remove('listening');
+        if (voiceStatusBanner) voiceStatusBanner.textContent = 'Voice Assistant Ready • Click orb or speak';
+        showToast('Microphone deactivated', 'info');
+      }
+    }
+
+    btnMic.addEventListener('click', toggleMic);
+    if (voiceOrb) voiceOrb.addEventListener('click', toggleMic);
+  } else if (btnMic) {
+    btnMic.addEventListener('click', () => {
+      showToast('SpeechRecognition not supported in this browser. Use simulation below.', 'info');
+    });
+  }
+
   btnSim.addEventListener('click', () => {
     sendVoiceSim(simInput.value.trim());
     simInput.value = '';
@@ -606,8 +957,7 @@ function initVoiceSimulator() {
 
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
-      const cmd = chip.getAttribute('data-cmd');
-      sendVoiceSim(cmd);
+      sendVoiceSim(chip.getAttribute('data-cmd'));
     });
   });
 
@@ -616,7 +966,7 @@ function initVoiceSimulator() {
   });
 }
 
-// Poll Logs Stream
+// 12. Poll Logs Stream
 async function pollLogs() {
   try {
     const res = await fetch('/api/events?limit=40');
@@ -636,11 +986,11 @@ async function pollLogs() {
     });
     logsConsole.scrollTop = logsConsole.scrollHeight;
   } catch (err) {
-    console.warn('Failed to poll logs:', err);
+    console.warn('Logs poll note:', err);
   }
 }
 
-// 8. Diagnostics Runner
+// 13. Diagnostics Runner
 function initDiagnostics() {
   const btnRun = document.getElementById('btn-run-diag');
   const container = document.getElementById('diag-cards-container');
@@ -654,14 +1004,14 @@ function initDiagnostics() {
       const data = await res.json();
       container.innerHTML = '';
 
-      Object.entries(data.results).forEach(([name, res]) => {
+      Object.entries(data.results).forEach(([name, r]) => {
         const card = document.createElement('div');
         card.className = 'diag-card';
-        const isPass = res.pass;
+        const isPass = r.pass;
         card.innerHTML = `
           <div class="diag-info">
             <div class="diag-name">${name}</div>
-            <div class="diag-detail">${res.detail || (isPass ? 'Operational' : 'Failed')}</div>
+            <div class="diag-detail">${r.detail || (isPass ? 'Operational' : 'Failed')}</div>
           </div>
           <span class="diag-badge ${isPass ? 'pass' : 'fail'}">${isPass ? 'PASS' : 'FAIL'}</span>
         `;
@@ -678,10 +1028,9 @@ function initDiagnostics() {
   });
 }
 
-// 9. Keyboard Shortcuts
+// 14. Keyboard Shortcuts
 function initKeyboardShortcuts() {
   window.addEventListener('keydown', (e) => {
-    // Ignore inside inputs and textareas
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
 
     if (e.code === 'Space') {
@@ -697,7 +1046,7 @@ function initKeyboardShortcuts() {
   });
 }
 
-// 10. Waveform Canvas Visualizer
+// 15. Waveform Canvas Visualizer
 function initWaveformVisualizer() {
   const canvas = audioWaveformCanvas;
   if (!canvas) return;
@@ -713,7 +1062,7 @@ function initWaveformVisualizer() {
     ctx.clearRect(0, 0, w, h);
 
     const isReading = currentTelemetry && currentTelemetry.is_reading && currentTelemetry.status !== 'PAUSED';
-    const amplitude = isReading ? h * 0.35 : 2;
+    const amplitude = isReading ? h * 0.35 : 3;
 
     ctx.lineWidth = 2;
     ctx.strokeStyle = isReading ? '#00f2fe' : '#334155';

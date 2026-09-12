@@ -27,17 +27,19 @@ from translator import TranslationEngine
 from speech import SpeechEngine
 from voice_control import VoiceController
 from memory import BookMemoryManager
-from buttons import HardwareButtonController
+
+class DummyButtonController:
+    """Headless dummy controller for environments without physical GPIO hardware."""
+    def start(self): pass
+    def indicate_state(self, state): pass
+    def set_led(self, state): pass
+    def start_led_blink(self, rate): pass
+    def cleanup(self): pass
 
 class VisionVoiceApp:
     """
     Master Application Controller & Finite State Machine (FSM) for VisionVoice.
-    Operates as an integrated, hands-free smart physical-book assistive reading device.
-
-    CRITICAL RELIABILITY ARCHITECTURE:
-    - Every state has clear entry conditions, exit conditions, timeouts, and error paths.
-    - All state transitions are explicitly logged.
-    - No infinite unmonitored loops.
+    Operates as an integrated, hands-free smart physical-book assistive reading assistant.
     """
 
     def __init__(self):
@@ -53,12 +55,7 @@ class VisionVoiceApp:
         self.speech = SpeechEngine()
         self.memory = BookMemoryManager()
         self.voice = VoiceController(callback_handler=self.on_voice_command)
-        self.buttons = HardwareButtonController(
-            main_callback=self.on_main_button,
-            vol_up_callback=self.on_volume_up_button,
-            vol_down_callback=self.on_volume_down_button,
-            power_callback=self.on_power_button
-        )
+        self.buttons = DummyButtonController()
 
         # FSM State & Lifecycle Control
         self.state = "BOOT"
@@ -622,9 +619,10 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1 and sys.argv[1] in ["--gui", "-g", "--ui"]:
         from gui_app import main as run_gui
         run_gui()
-    elif len(sys.argv) > 1 and sys.argv[1] in ["--test", "--test-hardware", "-t"]:
-        from hardware_test import run_hardware_diagnostics
-        run_hardware_diagnostics()
+    elif len(sys.argv) > 1 and sys.argv[1] in ["--test", "--test-suite", "-t"]:
+        import unittest
+        import test_suite
+        unittest.main(module=test_suite, argv=[sys.argv[0]])
     else:
         app = VisionVoiceApp()
         app.start()

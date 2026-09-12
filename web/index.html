@@ -3,55 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VisionVoice — Smart Assistive Reading Command Center</title>
-  <meta name="description" content="Real-time control, camera alignment, multilingual OCR, speech telemetry, and diagnostics dashboard for VisionVoice hands-free reading assistant.">
+  <title>VisionVoice — AI-Powered Multilingual Assistive Reading Web Platform</title>
+  <meta name="description" content="VisionVoice is an intelligent, completely hands-free assistive reading web platform for physical books with real-time computer vision, multilingual Indic OCR, neural translation, and audio synthesis.">
+  <meta name="keywords" content="assistive reading, multilingual OCR, Indic languages, text to speech, camera scanner, Tamil, Hindi, Kannada, Telugu, Malayalam, English">
+  <meta property="og:title" content="VisionVoice — Smart Multilingual Assistive Reader">
+  <meta property="og:description" content="AI-Powered hands-free reading assistant for physical books and documents in 6 languages.">
   <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>">
 </head>
 <body>
 
-  <!-- Top App Navigation & Telemetry Bar -->
+  <!-- Top Glassmorphic Navigation Bar -->
   <header class="top-navbar">
-    <div class="brand-section">
+    <div class="brand-section" id="nav-brand-btn">
       <div class="brand-logo">👁️</div>
       <div>
         <h1 class="brand-title">VisionVoice</h1>
-        <div class="brand-subtitle">Smart Hands-Free Assistive Reading Assistant</div>
+        <div class="brand-subtitle">AI Assistive Reading Web Platform</div>
       </div>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="tab-navigation">
-      <button class="tab-btn active" data-tab="tab-station">📺 Live Station</button>
+      <button class="tab-btn active" data-tab="tab-station">📖 Live Reader</button>
       <button class="tab-btn" data-tab="tab-studio">🌐 Multilingual Studio</button>
       <button class="tab-btn" data-tab="tab-library">📚 Book Library</button>
-      <button class="tab-btn" data-tab="tab-gallery">📸 Page Gallery</button>
-      <button class="tab-btn" data-tab="tab-voice">🎙️ Voice Console</button>
-      <button class="tab-btn" data-tab="tab-diagnostics">🩺 Diagnostics</button>
+      <button class="tab-btn" data-tab="tab-gallery">📸 Scan Gallery</button>
+      <button class="tab-btn" data-tab="tab-voice">🎙️ Voice Assistant</button>
+      <button class="tab-btn" data-tab="tab-diagnostics">🩺 Cloud Health</button>
     </nav>
 
     <!-- Global Telemetry Status Indicators -->
     <div class="nav-telemetry-bar">
       <div id="status-badge" class="status-pill">
         <span class="status-dot"></span>
-        <span id="status-text">INITIALIZING</span>
+        <span id="status-text">READY</span>
+      </div>
+
+      <div class="stat-chip" style="border-color: rgba(0, 242, 254, 0.35);">
+        <span style="color: var(--accent-cyan); font-weight: 700;">⚡ Vercel Edge</span>
       </div>
 
       <div class="stat-chip">
         <span>Lang:</span>
-        <select id="global-lang-select" class="form-select" style="padding: 0.15rem 0.4rem; font-size: 0.78rem;">
+        <select id="global-lang-select" class="form-select">
           <option value="en">English (en)</option>
-          <option value="ta">Tamil (ta)</option>
-          <option value="hi">Hindi (hi)</option>
-          <option value="kn">Kannada (kn)</option>
-          <option value="te">Telugu (te)</option>
-          <option value="ml">Malayalam (ml)</option>
+          <option value="ta">Tamil (தமிழ்)</option>
+          <option value="hi">Hindi (हिन्दी)</option>
+          <option value="kn">Kannada (ಕನ್ನಡ)</option>
+          <option value="te">Telugu (తెలుగు)</option>
+          <option value="ml">Malayalam (മലയാളം)</option>
         </select>
       </div>
 
       <div class="stat-chip">
         <span>Mode:</span>
-        <select id="global-mode-select" class="form-select" style="padding: 0.15rem 0.4rem; font-size: 0.78rem;">
+        <select id="global-mode-select" class="form-select">
           <option value="preferred">Translate (Preferred)</option>
           <option value="original">Original Script</option>
         </select>
@@ -59,90 +67,138 @@
 
       <div class="stat-chip">
         <span>Uptime:</span>
-        <span id="uptime-display">00:00:00</span>
+        <span id="uptime-display" style="font-family: var(--font-mono); min-width: 50px;">00:00:00</span>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
+  <!-- Website Hero Banner Section -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-badge">✨ Next-Gen Assistive Reading Web Platform</div>
+      <h2 class="hero-title">
+        Read Any Physical Book <span class="gradient-text">Hands-Free in 6 Languages</span>
+      </h2>
+      <p class="hero-desc">
+        Equipped with real-time computer vision page alignment, multilingual Indic OCR, neural machine translation, and synchronized karaoke speech playback.
+      </p>
+
+      <!-- Quick Action Presets -->
+      <div class="hero-quick-actions">
+        <button class="quick-action-btn primary" id="hero-btn-scan">
+          <span>🔘</span> Start Camera Scanner
+        </button>
+        <button class="quick-action-btn" id="hero-btn-upload">
+          <span>📁</span> Upload Book Photo
+        </button>
+        <button class="quick-action-btn" id="hero-btn-voice">
+          <span>🎙️</span> Voice Assistant
+        </button>
+        <button class="quick-action-btn" id="hero-btn-studio">
+          <span>🌐</span> Multilingual Studio
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Website Container -->
   <main class="dashboard-container">
 
-    <!-- TAB 1: LIVE READING STATION -->
+    <!-- TAB 1: LIVE READING STUDIO -->
     <section id="tab-station" class="tab-content active">
       <div class="station-grid">
         
-        <!-- Left: Live Camera Stream & Alignment HUD -->
+        <!-- Left: Live Camera Viewport & Page Scanner -->
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <span>📹 Real-time Camera Stream</span>
-              <span class="card-badge">LIVE MJPEG</span>
+              <span>📹 Live Camera & Page Scanner</span>
+              <span id="cam-mode-badge" class="card-badge">DEVICE WEBCAM</span>
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button id="btn-toggle-camera" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;" title="Close/Open Camera">
-                <span>📷</span> Turn Off Camera
+              <button id="btn-toggle-webcam" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;" title="Switch Camera Mode">
+                <span>📹</span> Switch Camera
               </button>
-              <div id="camera-fps-badge" class="card-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">30 FPS</div>
+              <button id="btn-toggle-camera" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;" title="Turn Off Video">
+                <span>📷</span> Turn Off
+              </button>
             </div>
           </div>
 
-          <div class="camera-container">
-            <img id="live-camera-feed" class="camera-stream" src="/api/camera/stream" alt="Live Camera Video Stream">
+          <!-- Camera Stream Container -->
+          <div class="camera-container" id="camera-dropzone">
+            <!-- Animated Laser Scan Beam -->
+            <div class="scan-laser" id="scan-laser-beam"></div>
+
+            <!-- Simulated / Backend Stream Fallback -->
+            <img id="live-camera-feed" class="camera-stream" src="/api/camera/snapshot" alt="Live Camera Video Stream" style="display: none;">
             
-            <div id="camera-off-overlay" style="display: none; position: absolute; inset: 0; background: rgba(7, 10, 18, 0.94); backdrop-filter: blur(8px); flex-direction: column; align-items: center; justify-content: center; gap: 1rem; z-index: 10;">
+            <!-- Live WebRTC Browser Webcam Video -->
+            <video id="browser-webcam-video" autoplay playsinline muted class="camera-stream"></video>
+            
+            <!-- Hidden Canvas for Snapshot Frame Extraction -->
+            <canvas id="snapshot-canvas" style="display: none;"></canvas>
+
+            <!-- Camera Off Overlay -->
+            <div id="camera-off-overlay" style="display: none; position: absolute; inset: 0; background: rgba(6, 9, 19, 0.94); backdrop-filter: blur(8px); flex-direction: column; align-items: center; justify-content: center; gap: 1rem; z-index: 10;">
               <div style="font-size: 2.8rem;">📷</div>
-              <div style="font-weight: 700; font-size: 1.15rem; color: #fff;">Camera is Turned Off</div>
-              <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; text-align: center;">Video acquisition is stopped to conserve CPU and energy.</p>
+              <div style="font-weight: 700; font-size: 1.15rem; color: #fff;">Camera Acquisition Paused</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; text-align: center;">Click below to resume live video feed or upload a photo.</p>
               <button id="btn-turn-on-camera" class="btn btn-primary" style="padding: 0.6rem 1.4rem;">
-                <span>📷</span> Turn On Camera
+                <span>📷</span> Resume Camera Feed
               </button>
             </div>
 
+            <!-- Real-Time Holographic HUD Guide -->
             <div class="camera-hud-overlay">
               <div class="hud-top-row">
-                <span class="hud-badge">ROI: Active Target Box</span>
-                <span id="hud-alignment-status" class="hud-badge" style="color: var(--accent-cyan);">Detecting Alignment...</span>
+                <span class="hud-badge" id="hud-roi-badge">ROI: Target Reading Box</span>
+                <span id="hud-alignment-status" class="hud-badge" style="color: var(--accent-cyan);">Ready to Scan</span>
               </div>
               <div class="hud-bottom-row">
                 <div id="hud-guidance-text" class="hud-guidance-pill">
-                  Align page within green bounding guide
+                  Align page within target boundary or drop a photo here
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Quick Action Buttons -->
+          <!-- Action Buttons -->
           <div class="stream-actions">
-            <button id="btn-scan-read" class="btn btn-primary">
+            <button id="btn-scan-read" class="btn btn-primary" style="flex: 2;">
               <span>🔘</span> SCAN & READ BOOK [SPACE]
             </button>
-            <button id="btn-refresh-stream" class="btn btn-secondary" title="Re-sync Stream">
-              <span>🔄</span> Re-Sync Feed
+            <button id="btn-upload-photo" class="btn btn-secondary" style="flex: 1;">
+              <span>📁</span> Upload Photo
+            </button>
+            <input type="file" id="book-image-upload" accept="image/*" style="display: none;">
+            <button id="btn-refresh-stream" class="btn btn-secondary" title="Re-sync Feed">
+              <span>🔄</span>
             </button>
           </div>
         </div>
 
-        <!-- Right: Active Reading Stage & Synchronized Audio Player -->
+        <!-- Right: Active Reading Stage & Synchronized Audio Deck -->
         <div class="glass-card active-reading-stage">
           <div class="card-header">
             <div class="card-title">
               <span>🔊 Active Speech Telemetry</span>
             </div>
-            <div id="reading-book-pill" class="card-badge">Book: None</div>
+            <div id="reading-book-pill" class="card-badge">Book: VisionVoice-Guide</div>
           </div>
 
           <!-- Live Karaoke / Subtitle Highlight Box -->
           <div class="karaoke-display">
             <div id="karaoke-index" class="karaoke-sentence-index">Sentence: 0 / 0</div>
             <div id="karaoke-text" class="karaoke-text empty-state">
-              Place a book in the camera view and click "Scan & Read Book" to extract text and begin listening.
+              Place a book in the camera view or upload an image and click "Scan & Read Book" to extract text and begin listening.
             </div>
           </div>
 
           <!-- Audio Waveform Visualizer Canvas -->
           <canvas id="audio-waveform" class="audio-visualizer-canvas"></canvas>
 
-          <!-- Playback Controls -->
+          <!-- Playback Controls Row -->
           <div class="playback-controls-row">
             <div class="ctrl-btn-group">
               <button id="btn-ctrl-prev" class="ctrl-btn" title="Previous Sentence">⏮</button>
@@ -152,10 +208,17 @@
               <button id="btn-ctrl-stop" class="ctrl-btn" title="Stop Reading" style="color: var(--accent-rose);">⏹</button>
             </div>
 
+            <div class="speed-chips">
+              <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 0.2rem;">Speed:</span>
+              <button class="speed-chip" data-speed="0.85">0.85x</button>
+              <button class="speed-chip active" data-speed="1.0">1.0x</button>
+              <button class="speed-chip" data-speed="1.2">1.2x</button>
+            </div>
+
             <div class="volume-slider-group">
               <span>🔊</span>
               <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="80">
-              <span id="volume-label" style="font-family: var(--font-mono); min-width: 34px;">80%</span>
+              <span id="volume-label" style="font-family: var(--font-mono); min-width: 32px;">80%</span>
             </div>
           </div>
 
@@ -189,13 +252,13 @@
           </div>
         </div>
 
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Test OCR sentence extraction, Unicode script identification, and neural translation across all 6 supported Indic languages.
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Test instant sentence extraction, Unicode script identification, and neural translation across all 6 supported Indic languages.
         </p>
 
         <!-- Quick Sample Selector -->
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-          <span style="font-size: 0.82rem; color: var(--text-muted); align-self: center;">Quick Samples:</span>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+          <span style="font-size: 0.82rem; color: var(--text-muted); align-self: center;">Quick Presets:</span>
           <button class="btn btn-secondary sample-btn" data-sample="en" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">English</button>
           <button class="btn btn-secondary sample-btn" data-sample="ta" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Tamil (தமிழ்)</button>
           <button class="btn btn-secondary sample-btn" data-sample="hi" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Hindi (हिन्दी)</button>
@@ -247,15 +310,15 @@
       <div class="glass-card">
         <div class="card-header">
           <div class="card-title">
-            <span>📚 Persistent Book Memory Library</span>
+            <span>📚 Digital Book Memory Shelf</span>
           </div>
           <button id="btn-refresh-books" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
-            <span>🔄</span> Refresh Library
+            <span>🔄</span> Refresh Shelf
           </button>
         </div>
 
         <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          VisionVoice automatically fingerprints books by vocabulary hashing and saves reading bookmarks persistently in <code>data/books/</code>.
+          VisionVoice automatically fingerprints physical books by vocabulary hashing and saves reading bookmarks in browser storage & cloud sessions.
         </p>
 
         <div id="books-cards-container" class="book-cards-grid">
@@ -270,7 +333,7 @@
       <div class="glass-card">
         <div class="card-header">
           <div class="card-title">
-            <span>📸 Captured Page Images & CV Preprocessing</span>
+            <span>📸 Scanned Pages & Document Gallery</span>
           </div>
           <button id="btn-refresh-gallery" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
             <span>🔄</span> Refresh Gallery
@@ -278,7 +341,7 @@
         </div>
 
         <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Click any captured page to inspect full resolution, 4-corner perspective unwarping, and CLAHE contrast enhancement.
+          Inspect recent captured pages and OCR scan history.
         </p>
 
         <div id="gallery-container" class="gallery-grid">
@@ -292,17 +355,28 @@
     <section id="tab-voice" class="tab-content">
       <div class="station-grid">
         
-        <!-- Left: Spoken Utterance Simulator -->
+        <!-- Left: Spoken Utterance Simulator & Mic Input -->
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <span>🎙️ Spoken Command Simulator</span>
+              <span>🎙️ Spoken Command Center</span>
             </div>
+            <button id="btn-toggle-mic" class="btn btn-accent" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">
+              <span id="mic-icon">🎙️</span> <span id="mic-status-text">Start Mic Listening</span>
+            </button>
           </div>
 
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Test speech recognition intent parsing and wake-phrase handling without physical microphone input.
+            Speak naturally using your device microphone or test voice intents below.
           </p>
+
+          <!-- Voice Sphere Visualizer -->
+          <div class="voice-sphere-container">
+            <div class="voice-orb" id="voice-assistant-orb" title="Click to Toggle Microphone"></div>
+            <div id="voice-status-banner" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+              Voice Assistant Ready • Click orb or speak
+            </div>
+          </div>
 
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <input type="text" id="voice-sim-input" class="pane-textarea" style="height: 48px;" placeholder="e.g. 'Hey VisionVoice', 'Start reading', 'Stop', 'Increase volume'...">
@@ -331,7 +405,7 @@
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <span>📜 Real-Time System Event Log</span>
+              <span>📜 Real-Time Telemetry Event Log</span>
             </div>
             <button id="btn-clear-logs" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Clear</button>
           </div>
@@ -340,7 +414,7 @@
             <div class="log-entry">
               <span class="log-time">00:00:00</span>
               <span class="log-cat">[SYSTEM]</span>
-              <span class="log-msg">Connecting to telemetry stream...</span>
+              <span class="log-msg">Connecting to VisionVoice Vercel telemetry stream...</span>
             </div>
           </div>
         </div>
@@ -354,7 +428,7 @@
       <div class="glass-card">
         <div class="card-header">
           <div class="card-title">
-            <span>🩺 Hardware & Subsystem Health Diagnostics</span>
+            <span>🩺 Cloud & Subsystem Health Suite</span>
           </div>
           <button id="btn-run-diag" class="btn btn-primary" style="padding: 0.45rem 1.25rem;">
             <span>⚡</span> Run Full Self-Test Suite
@@ -362,17 +436,16 @@
         </div>
 
         <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Verifies physical and emulated components: Camera Capture, USB Microphone, eSpeak-ng Audio Synthesis, ALSA plughw:3,0 Endpoints, GPIO Pull-up Buttons, and Status LED.
+          Verifies Vercel Serverless Edge API, Multilingual Indic OCR Pipeline, Neural Translation Engine, WebRTC Video Stream, and Speech Synthesis.
         </p>
 
         <div id="diag-cards-container" class="diag-grid">
-          <!-- Populated dynamically via JS -->
           <div class="diag-card">
             <div class="diag-info">
-              <div class="diag-name">📷 Camera Video Source</div>
-              <div class="diag-detail">Checking camera capture...</div>
+              <div class="diag-name">⚡ Vercel Serverless Runtime</div>
+              <div class="diag-detail">Ready to run verification suite</div>
             </div>
-            <span class="diag-badge pass">CHECKING</span>
+            <span class="diag-badge pass">READY</span>
           </div>
         </div>
       </div>
@@ -380,10 +453,24 @@
 
   </main>
 
+  <!-- Website Footer -->
+  <footer class="site-footer">
+    <div class="footer-shortcuts">
+      <div class="shortcut-pill"><span class="kbd">Space</span> Scan & Read</div>
+      <div class="shortcut-pill"><span class="kbd">P</span> Play / Pause</div>
+      <div class="shortcut-pill"><span class="kbd">N</span> Next Sentence</div>
+      <div class="shortcut-pill"><span class="kbd">R</span> Repeat Sentence</div>
+    </div>
+    <div>
+      VisionVoice • AI Multilingual Assistive Reading Platform • Built for Universal Accessibility
+    </div>
+  </footer>
+
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
   <!-- Dashboard JavaScript -->
   <script src="/static/js/dashboard.js"></script>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>

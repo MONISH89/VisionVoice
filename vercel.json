@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/static/css/(.*)", "destination": "/web/css/$1" },
+    { "source": "/static/js/(.*)", "destination": "/web/js/$1" },
+    { "source": "/static/(.*)", "destination": "/web/$1" },
+    { "source": "/css/(.*)", "destination": "/web/css/$1" },
+    { "source": "/js/(.*)", "destination": "/web/js/$1" },
+    { "source": "/", "destination": "/web/index.html" },
+    { "source": "/(.*)", "destination": "/web/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
+}

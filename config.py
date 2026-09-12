@@ -3,17 +3,31 @@ import sys
 
 # Base Directory Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-BOOKS_DIR = os.path.join(DATA_DIR, "books")
-SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
-CAPTURES_DIR = os.path.join(BASE_DIR, "captures")
-LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
-DEBUG_DIR = os.path.join(BASE_DIR, "debug")
+# On Vercel / AWS Lambda, filesystem is read-only except /tmp
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("LAMBDA_TASK_ROOT"))
 
-# Ensure required directories exist
+if IS_SERVERLESS:
+    DATA_DIR = "/tmp/visionvoice_data"
+    BOOKS_DIR = os.path.join(DATA_DIR, "books")
+    SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
+    CAPTURES_DIR = "/tmp/visionvoice_captures"
+    LOGS_DIR = "/tmp/visionvoice_logs"
+    DEBUG_DIR = "/tmp/visionvoice_debug"
+else:
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    BOOKS_DIR = os.path.join(DATA_DIR, "books")
+    SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
+    CAPTURES_DIR = os.path.join(BASE_DIR, "captures")
+    LOGS_DIR = os.path.join(BASE_DIR, "logs")
+    DEBUG_DIR = os.path.join(BASE_DIR, "debug")
+
+# Ensure required directories exist safely
 for directory in [DATA_DIR, BOOKS_DIR, SESSIONS_DIR, CAPTURES_DIR, LOGS_DIR, DEBUG_DIR]:
-    os.makedirs(directory, exist_ok=True)
+    try:
+        os.makedirs(directory, exist_ok=True)
+    except Exception:
+        pass
 
 # Application Information
 APP_NAME = "VisionVoice"
@@ -100,10 +114,7 @@ MAX_OCR_RETRIES = 3                  # Max OCR attempts on empty/illegible page 
 PROMPT_LISTEN_TIMEOUT_SEC = 7.0      # Max seconds to wait for user voice response to setup prompts
 MAX_TTS_PLAYBACK_TIMEOUT_SEC = 60.0  # Max seconds before terminating stuck audio playback process
 
-# Audio & ALSA Hardware Settings (USB PnP Sound Device)
-ALSA_CARD_INDEX = 3
-ALSA_PLAYBACK_DEVICE = "plughw:3,0"    # Explicit hardware routing: Card 3, Device 0
-MIC_DEVICE_INDEX = 2                 # Detected USB PnP Sound Device: Audio (hw:3,0) index 2
+# Audio & Volume Settings
 DEFAULT_VOLUME = 80                  # Range 0 to 100
 VOLUME_STEP = 10                     # Volume change step
 TTS_SPEECH_RATE = 1.0                # 1.0 standard speed
@@ -119,18 +130,6 @@ CMD_CONTINUE_READING = ["continue reading", "continue", "resume"]
 CMD_INCREASE_VOLUME = ["increase volume", "volume up", "louder"]
 CMD_DECREASE_VOLUME = ["decrease volume", "volume down", "quieter"]
 
-# GPIO Pins (Raspberry Pi - BCM Numbering)
-# Hardware Prototype Pinout:
-# GPIO17 -> Main / Interaction button
-# GPIO27 -> Volume UP button
-# GPIO22 -> Volume DOWN button
-# GPIO24 -> Status LED
-PIN_MAIN_BTN = 17        # Physical Main / Interaction button pin (BCM GPIO17)
-PIN_POWER_BTN = 17       # Alias for backward compatibility
-PIN_VOL_UP_BTN = 27      # Physical Volume Up button pin (BCM GPIO27)
-PIN_VOL_DOWN_BTN = 22    # Physical Volume Down button pin (BCM GPIO22)
-PIN_STATUS_LED = 24      # System Status LED pin (BCM GPIO24)
-
-# Development & Fallback Controls
-SHOW_DEV_PREVIEW = False     # Set to True to display OpenCV window on desktop
+# Development & Logging Controls
+SHOW_DEV_PREVIEW = False
 LOG_LEVEL = "INFO"

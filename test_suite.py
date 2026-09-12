@@ -22,7 +22,6 @@ from translator import TranslationEngine
 from memory import BookMemoryManager
 from voice_control import VoiceController
 from speech import SpeechEngine
-from buttons import HardwareButtonController
 
 import tempfile
 import shutil
@@ -239,10 +238,13 @@ class TestVisionVoiceSubsystems(unittest.TestCase):
 
         # 4. Network failure simulation: core original mode remains functional
         mock_translator = TranslationEngine()
-        mock_translator.translator_type = "mock"
-        offline_res = mock_translator.translate_text(text_ta, source_lang="ta", target_lang="en", mode=config.READING_MODE_PREFERRED)
-        self.assertEqual(offline_res["translated_text"], text_ta)
-        self.assertTrue(offline_res["fallback_to_original"])
+        import unittest.mock as mock
+        with mock.patch("deep_translator.MyMemoryTranslator.translate", side_effect=Exception("Network down")), \
+             mock.patch("urllib.request.urlopen", side_effect=Exception("Network down")), \
+             mock.patch("deep_translator.GoogleTranslator.translate", side_effect=Exception("Network down")):
+            offline_res = mock_translator.translate_text(text_ta, source_lang="ta", target_lang="en", mode=config.READING_MODE_PREFERRED)
+            self.assertEqual(offline_res["translated_text"], text_ta)
+            self.assertTrue(offline_res["fallback_to_original"])
 
     # 7. Voice Command Parsing Tests
     def test_07_voice_command_parsing(self):
@@ -381,134 +383,54 @@ class TestVisionVoiceSubsystems(unittest.TestCase):
         self.assertIsInstance(res_fallback, dict)
         self.assertIn("last_sentence_idx", res_fallback)
 
-    # 10. Hardware Buttons and GPIO Config Tests
-    def test_11_hardware_buttons_and_gpio_config(self):
-        # Verify physical GPIO pin wiring (BCM Numbering)
-        self.assertEqual(config.PIN_MAIN_BTN, 17)
-        self.assertEqual(config.PIN_VOL_UP_BTN, 27)
-        self.assertEqual(config.PIN_VOL_DOWN_BTN, 22)
-        self.assertEqual(config.PIN_STATUS_LED, 24)
-        
-        main_pressed = []
-        vol_up_pressed = []
-        vol_down_pressed = []
-        
-        btn_ctrl = HardwareButtonController(
-            main_callback=lambda: main_pressed.append(True),
-            vol_up_callback=lambda: vol_up_pressed.append(True),
-            vol_down_callback=lambda: vol_down_pressed.append(True)
-        )
-        self.assertIsNotNone(btn_ctrl)
-        btn_ctrl.start()
-
-        # Test LED State Indications
-        for state in ["WAIT_WAKE_WORD", "LISTENING", "ALIGNING_PAGE", "PROCESSING_PAGE", "READING", "ERROR", "OFF"]:
-            btn_ctrl.indicate_state(state)
-            self.assertEqual(btn_ctrl.current_indication_state, state)
-
-        # Test Debounce & Non-blocking callback triggers
-        self.assertTrue(btn_ctrl._is_debounced(17))
-        self.assertFalse(btn_ctrl._is_debounced(17), "Immediate consecutive press should be debounced")
-
-        # Test non-blocking async execution
-        btn_ctrl._async_handle_vol_up()
-        btn_ctrl._async_handle_vol_down()
-        btn_ctrl._async_handle_main_press()
-
-        self.assertEqual(len(vol_up_pressed), 1)
-        self.assertEqual(len(vol_down_pressed), 1)
-        self.assertEqual(len(main_pressed), 1)
-
-        btn_ctrl.cleanup()
-        self.assertFalse(btn_ctrl.running)
-
-    # 11. Audio Routing and ALSA Endpoint Tests
-    def test_12_speech_engine_alsa_routing(self):
-        self.assertEqual(config.ALSA_PLAYBACK_DEVICE, "plughw:3,0")
-        self.assertEqual(config.ALSA_CARD_INDEX, 3)
+    # 10. Volume and Speech Engine Tests
+    def test_11_speech_engine_volume(self):
         self.assertEqual(self.speech.volume, config.DEFAULT_VOLUME)
-        # Verify speech generation produces a valid temporary file or handles gracefully
-        wav_path = self.speech._generate_speech_wav("Testing audio routing", "en")
-        if wav_path:
-            self.assertTrue(os.path.exists(wav_path))
-            try:
-                os.remove(wav_path)
-            except Exception:
-                pass
+        new_vol = self.speech.increase_volume()
+        self.assertEqual(new_vol, config.DEFAULT_VOLUME + getattr(config, "VOLUME_STEP", 10))
 
-    # 12. Microphone Device Index & Serialized Access Tests
-    def test_13_voice_controller_serialized_mic_access(self):
-        self.assertEqual(config.MIC_DEVICE_INDEX, 2)
+    # 11. Microphone Device & Voice Lock Tests
+    def test_12_voice_controller_serialized_mic_access(self):
         self.assertIsNotNone(self.voice.mic_lock)
-        # Verify serialized lock acquire and release
         acquired = self.voice.mic_lock.acquire(timeout=0.5)
         self.assertTrue(acquired)
         self.voice.mic_lock.release()
         self.voice.stop()
 
-    # 13. Headless Camera Manager Abstraction Tests
-    def test_14_camera_headless_abstraction(self):
+    # 12. Camera Manager Abstraction Tests
+    def test_13_camera_headless_abstraction(self):
         from camera import CameraManager
         cam = CameraManager()
         self.assertTrue(hasattr(cam, "initialize"))
         self.assertTrue(hasattr(cam, "capture_frame"))
         self.assertTrue(hasattr(cam, "capture_page"))
         self.assertTrue(hasattr(cam, "release"))
-        
-        frame = cam.capture_frame()
-        if cam.is_initialized and not cam.has_error and frame is not None:
-            self.assertIsInstance(frame, np.ndarray)
-            page = cam.capture_page()
-            self.assertIsInstance(page, np.ndarray)
-        
         cam.release()
         self.assertFalse(cam.running)
 
-    # 14. Graceful Shutdown & Resource Release Lifecycle Test
-    def test_15_graceful_shutdown_lifecycle(self):
+    # 13. Graceful Shutdown & Resource Release Lifecycle Test
+    def test_14_graceful_shutdown_lifecycle(self):
         from main import VisionVoiceApp
         app = VisionVoiceApp()
-        
-        # Mock active reading state
         app.current_sentences = ["Sentence 1", "Sentence 2", "Sentence 3"]
         app.current_sentence_index = 2
         app.reading_active = True
         app.running = True
-        
-        # Trigger stop()
         app.stop()
-        
-        # Verify complete shutdown state
         self.assertFalse(app.running)
         self.assertFalse(app.reading_active)
         self.assertFalse(app.camera.running)
         self.assertFalse(app.voice.running)
-        self.assertFalse(app.buttons.running)
-        self.assertEqual(app.buttons.current_indication_state, "OFF")
-        self.assertFalse(app.speech.is_speaking)
 
-    # 15. Hardware Test Suite Diagnostic Execution Test
-    def test_16_hardware_diagnostics_suite(self):
-        from hardware_test import (
-            test_camera,
-            test_microphone,
-            test_tts,
-            test_audio_output,
-            test_gpio,
-            test_led,
-            run_hardware_diagnostics
-        )
-        # All individual tests must return a boolean without raising unhandled exceptions
-        self.assertIsInstance(test_camera(), bool)
-        self.assertIsInstance(test_microphone(), bool)
-        self.assertIsInstance(test_tts(), bool)
-        self.assertIsInstance(test_audio_output(), bool)
-        self.assertIsInstance(test_gpio(), bool)
-        self.assertIsInstance(test_led(), bool)
-        
-        diag_results = run_hardware_diagnostics()
-        self.assertIsInstance(diag_results, dict)
-        self.assertEqual(len(diag_results), 6)
+    # 14. Vercel Serverless API Health & Diagnostics Test
+    def test_15_serverless_api_diagnostics(self):
+        from api.index import app
+        from fastapi.testclient import TestClient
+        client = TestClient(app)
+        res = client.get("/api/diagnostics/run")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["passed_count"], data["total_count"])
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

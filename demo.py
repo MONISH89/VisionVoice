@@ -82,7 +82,7 @@ def run_automated_demo(selected_lang="en"):
     print("        Hands-Free Multilingual Assistive Reading Assistant")
     print("=" * 70)
     print(f"Target Language: {config.SUPPORTED_LANGUAGES.get(selected_lang, {}).get('name', 'English')}")
-    print(f"Environment:     macOS / Raspberry Pi Ready (Audio: Fallback / ALSA plughw:3,0)")
+    print(f"Environment:     Cross-Platform & Cloud / Vercel Web Ready")
     print("=" * 70)
 
     # 1. Initialization

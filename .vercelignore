@@ -1,0 +1,27 @@
+# Vercel Deployment Exclusions for Maximum Speed & Small Bundle Size
+.venv
+.vscode
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+
+# Local runtime directories
+captures/
+debug/
+logs/
+data/
+
+# Desktop GUI & Raspberry Pi Specific Files
+gui_app.py
+hardware_test.py
+buttons.py
+setup.sh
+visionvoice.service
+test_suite.py
+simulate.py
+phase1_pipeline.py
+demo.py

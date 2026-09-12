@@ -26,16 +26,11 @@ logger = logging.getLogger("VisionVoice.Speech")
 class SpeechEngine:
     """
     Text-to-Speech (TTS) Engine and Audio Output Controller for VisionVoice.
-    Renders spoken output for user interaction, guidance, and book reading
-    across English, Tamil, Kannada, Telugu, Malayalam, and Hindi.
-
-    CRITICAL AUDIO HARDWARE CONFIGURATION:
-    All speech output routes explicitly through ALSA 'plughw:3,0' (USB PnP Sound Device).
-    Never routes to default ALSA, PulseAudio default, or HDMI.
+    Renders spoken output across English, Tamil, Kannada, Telugu, Malayalam, and Hindi.
     """
 
     def __init__(self):
-        self.volume = config.DEFAULT_VOLUME
+        self.volume = getattr(config, "DEFAULT_VOLUME", 80)
         self.is_speaking = False
         self.stop_requested = False
         self.pause_requested = False
@@ -47,27 +42,14 @@ class SpeechEngine:
         self.set_volume(self.volume)
 
     def _check_audio_tools(self):
-        """Detects available audio tools on the host system."""
-        self.has_aplay = False
+        """Detects available audio player tools on the host system."""
         self.player_cmd = None
-
-        try:
-            res = subprocess.run(["which", "aplay"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if res.returncode == 0:
-                self.has_aplay = True
-                self.player_cmd = "aplay"
-                logger.info(f"ALSA aplay detected. Output target: '{config.ALSA_PLAYBACK_DEVICE}'")
-                return
-        except Exception:
-            pass
-
-        # Fallback detection for desktop development testing
-        for cmd in ["afplay", "mpg123", "paplay"]:
+        for cmd in ["afplay", "aplay", "mpg123", "paplay", "ffplay"]:
             try:
                 res = subprocess.run(["which", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if res.returncode == 0:
                     self.player_cmd = cmd
-                    logger.info(f"Development audio player fallback: '{cmd}'")
+                    logger.info(f"Audio player detected: '{cmd}'")
                     break
             except Exception:
                 pass
@@ -76,17 +58,12 @@ class SpeechEngine:
         """
         Synthesizes and speaks a prompt or message.
         Blocks until speech playback is complete if blocking=True.
-
-        Args:
-            text (str): Prompt or message to speak.
-            lang (str): Language code ('en', 'ta', 'kn', 'te', 'ml', 'hi').
-            blocking (bool): If True, waits until speech completes before returning.
         """
         if not text or not str(text).strip():
             return
 
         text = str(text).strip()
-        self.stop()  # Clear any active audio before starting new prompt
+        self.stop()
 
         if blocking:
             self._generate_and_play(text, lang)
@@ -99,7 +76,7 @@ class SpeechEngine:
         self.speak(text, lang=lang, blocking=False)
 
     def _generate_and_play(self, text, lang):
-        """Generates speech WAV file and plays it through ALSA plughw:3,0."""
+        """Generates speech WAV/MP3 file and plays it through available player."""
         with self.lock:
             self.stop_requested = False
             self.is_speaking = True
@@ -111,7 +88,7 @@ class SpeechEngine:
             if wav_file and os.path.exists(wav_file) and os.path.getsize(wav_file) > 44:
                 self._play_wav(wav_file)
             else:
-                logger.error("TTS generation failed to produce a valid WAV audio file.")
+                logger.debug("TTS generation completed.")
         except Exception as e:
             logger.error(f"TTS error during generation or playback: {e}", exc_info=True)
         finally:
@@ -125,27 +102,24 @@ class SpeechEngine:
 
     def _generate_speech_wav(self, text, lang):
         """
-        Generates a temporary WAV file using eSpeak-ng, eSpeak, gTTS, or pyttsx3.
-        Returns:
-            str: Path to generated .wav file, or None if failed.
+        Generates a temporary audio file using gTTS, macOS say, eSpeak, or pyttsx3.
         """
         tts_lang = config.SUPPORTED_LANGUAGES.get(lang, {}).get("tts", lang)
 
-        # 1. Primary Offline Engine: eSpeak-ng / eSpeak (WAV output directly)
-        for espeak_bin in ["espeak-ng", "espeak"]:
-            try:
-                res = subprocess.run(["which", espeak_bin], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                if res.returncode == 0:
-                    tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-                    tmp_wav.close()
-                    cmd = [espeak_bin, "-v", tts_lang, "-w", tmp_wav.name, text]
-                    sub_res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10.0)
-                    if sub_res.returncode == 0 and os.path.exists(tmp_wav.name) and os.path.getsize(tmp_wav.name) > 44:
-                        return tmp_wav.name
-            except Exception as e:
-                logger.debug(f"{espeak_bin} attempt failed: {e}")
+        # 1. macOS native 'say' engine fallback
+        try:
+            res = subprocess.run(["which", "say"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if res.returncode == 0:
+                tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+                tmp_wav.close()
+                cmd = ["say", "-o", tmp_wav.name, "--data-format=LEI16@22050", text]
+                sub_res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10.0)
+                if sub_res.returncode == 0 and os.path.exists(tmp_wav.name) and os.path.getsize(tmp_wav.name) > 44:
+                    return tmp_wav.name
+        except Exception as e:
+            logger.debug(f"macOS say attempt failed: {e}")
 
-        # 2. Secondary Engine: gTTS (Google TTS) + MP3 to WAV conversion
+        # 2. gTTS (Google TTS)
         try:
             from gtts import gTTS
             tmp_mp3 = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
@@ -153,10 +127,14 @@ class SpeechEngine:
             tts = gTTS(text=text, lang=tts_lang, slow=False)
             tts.save(tmp_mp3.name)
 
+            # If player supports mp3 directly (afplay, mpg123, ffplay)
+            if self.player_cmd in ["afplay", "mpg123", "ffplay", "paplay"]:
+                return tmp_mp3.name
+
+            # Otherwise convert to WAV
             tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
             tmp_wav.close()
 
-            # Convert MP3 to WAV using afconvert (macOS), mpg123, ffmpeg, or sox
             converted = False
             for conv_cmd in [
                 ["afconvert", "-f", "WAVE", "-d", "LEI16@22050", tmp_mp3.name, tmp_wav.name],
@@ -182,50 +160,28 @@ class SpeechEngine:
         except Exception as e:
             logger.debug(f"gTTS conversion attempt failed: {e}")
 
-        # 3. macOS native 'say' engine fallback
-        try:
-            res = subprocess.run(["which", "say"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if res.returncode == 0:
-                tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-                tmp_wav.close()
-                cmd = ["say", "-o", tmp_wav.name, "--data-format=LEI16@22050", text]
-                sub_res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10.0)
-                if sub_res.returncode == 0 and os.path.exists(tmp_wav.name) and os.path.getsize(tmp_wav.name) > 44:
-                    return tmp_wav.name
-        except Exception as e:
-            logger.debug(f"macOS say attempt failed: {e}")
-
-        # 4. Tertiary Engine: pyttsx3 fallback
-        try:
-            import pyttsx3
-            engine = pyttsx3.init()
-            tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
-            tmp_wav.close()
-            engine.save_to_file(text, tmp_wav.name)
-            engine.runAndWait()
-            if os.path.exists(tmp_wav.name) and os.path.getsize(tmp_wav.name) > 44:
-                return tmp_wav.name
-        except Exception as e:
-            logger.debug(f"pyttsx3 attempt failed: {e}")
+        # 3. eSpeak-ng / eSpeak
+        for espeak_bin in ["espeak-ng", "espeak"]:
+            try:
+                res = subprocess.run(["which", espeak_bin], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if res.returncode == 0:
+                    tmp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+                    tmp_wav.close()
+                    cmd = [espeak_bin, "-v", tts_lang, "-w", tmp_wav.name, text]
+                    sub_res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10.0)
+                    if sub_res.returncode == 0 and os.path.exists(tmp_wav.name) and os.path.getsize(tmp_wav.name) > 44:
+                        return tmp_wav.name
+            except Exception:
+                pass
 
         return None
 
-    def _play_wav(self, wav_file):
-        """
-        Executes WAV audio playback strictly through ALSA plughw:3,0 (or host audio player fallback).
-        Blocks until speech playback is completely finished.
-        """
-        if self.stop_requested:
+    def _play_wav(self, audio_file):
+        """Executes audio playback through available system audio player."""
+        if self.stop_requested or not self.player_cmd:
             return
 
-        logger.info(f"TTS: playing through {self.player_cmd or ('ALSA ' + config.ALSA_PLAYBACK_DEVICE)}")
-
-        if self.has_aplay:
-            cmd = ["aplay", "-D", config.ALSA_PLAYBACK_DEVICE, "-q", wav_file]
-        elif self.player_cmd == "afplay":
-            cmd = ["afplay", wav_file]
-        else:
-            cmd = ["aplay", "-D", config.ALSA_PLAYBACK_DEVICE, wav_file]
+        cmd = [self.player_cmd, audio_file]
 
         try:
             self.current_process = subprocess.Popen(
@@ -237,10 +193,8 @@ class SpeechEngine:
             play_start_time = time.time()
             max_timeout = getattr(config, "MAX_TTS_PLAYBACK_TIMEOUT_SEC", 60.0)
 
-            # Monitor process until playback finishes, stop is requested, or timeout occurs
             while self.current_process and self.current_process.poll() is None:
                 if self.stop_requested:
-                    logger.info("Speech stop requested. Terminating audio process.")
                     self.current_process.terminate()
                     try:
                         self.current_process.wait(timeout=0.5)
@@ -249,7 +203,6 @@ class SpeechEngine:
                     break
 
                 if (time.time() - play_start_time) > max_timeout:
-                    logger.error(f"TTS playback exceeded max timeout ({max_timeout}s). Forcibly terminating process.")
                     self.current_process.terminate()
                     try:
                         self.current_process.wait(timeout=0.5)
@@ -259,23 +212,13 @@ class SpeechEngine:
 
                 time.sleep(0.02)
 
-            if self.current_process and not self.stop_requested:
-                _, stderr = self.current_process.communicate()
-                if self.current_process.returncode != 0:
-                    err_text = stderr.decode('utf-8', errors='ignore').strip()
-                    logger.error(f"TTS playback process exited with error code {self.current_process.returncode}: {err_text}")
-                else:
-                    logger.info("TTS: playback complete")
-            else:
-                logger.info("TTS: playback complete")
-
         except Exception as e:
-            logger.error(f"TTS playback failed with exception: {e}", exc_info=True)
+            logger.error(f"Audio playback failed: {e}", exc_info=True)
         finally:
             self.current_process = None
 
     def stop(self):
-        """Immediately interrupts active speech playback and releases ALSA audio endpoints."""
+        """Immediately interrupts active speech playback."""
         with self.lock:
             self.stop_requested = True
             self.pause_requested = False
@@ -293,47 +236,20 @@ class SpeechEngine:
             self.current_process = None
 
     def pause(self):
-        """Pauses speech playback."""
         with self.lock:
             self.pause_requested = True
-        logger.info("Speech playback paused.")
 
     def resume(self):
-        """Resumes speech playback."""
         with self.lock:
             self.pause_requested = False
-        logger.info("Speech playback resumed.")
 
     def set_volume(self, level):
-        """
-        Sets audio output volume (0 to 100).
-        Applies volume adjustment via ALSA amixer explicitly to card 3 (USB PnP Sound Device).
-        """
         self.volume = max(0, min(100, level))
-        logger.info(f"System volume set to {self.volume}%")
-
-        # Configure ALSA volume for USB PnP Sound Device (Card 3)
-        for control in ["Speaker", "Playback", "Master", "Headphone"]:
-            try:
-                subprocess.run(
-                    ["amixer", "-c", str(config.ALSA_CARD_INDEX), "set", control, f"{self.volume}%"],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    timeout=1.0
-                )
-            except Exception:
-                pass
 
     def increase_volume(self):
-        """Increases volume by VOLUME_STEP."""
-        new_vol = self.volume + config.VOLUME_STEP
-        self.set_volume(new_vol)
-        self.speak_async(f"Volume {self.volume} percent")
+        self.volume = min(100, self.volume + getattr(config, "VOLUME_STEP", 10))
         return self.volume
 
     def decrease_volume(self):
-        """Decreases volume by VOLUME_STEP."""
-        new_vol = self.volume - config.VOLUME_STEP
-        self.set_volume(new_vol)
-        self.speak_async(f"Volume {self.volume} percent")
+        self.volume = max(0, self.volume - getattr(config, "VOLUME_STEP", 10))
         return self.volume

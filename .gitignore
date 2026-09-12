@@ -1,4 +1,19 @@
+# Python & Virtual Environments
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Local logs and temporary capture artifacts
+logs/*.log
+captures/*.jpg
+captures/*.png
+debug/*.png
+debug/*.jpg
+
+# System & IDE
 .DS_Store
+.vscode/
+.idea/
