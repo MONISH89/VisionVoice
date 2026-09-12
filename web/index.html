@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisionVoice — Smart Assistive Reading Command Center</title>
+  <meta name="description" content="Real-time control, camera alignment, multilingual OCR, speech telemetry, and diagnostics dashboard for VisionVoice hands-free reading assistant.">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>">
+</head>
+<body>
+
+  <!-- Top App Navigation & Telemetry Bar -->
+  <header class="top-navbar">
+    <div class="brand-section">
+      <div class="brand-logo">👁️</div>
+      <div>
+        <h1 class="brand-title">VisionVoice</h1>
+        <div class="brand-subtitle">Smart Hands-Free Assistive Reading Assistant</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="tab-station">📺 Live Station</button>
+      <button class="tab-btn" data-tab="tab-studio">🌐 Multilingual Studio</button>
+      <button class="tab-btn" data-tab="tab-library">📚 Book Library</button>
+      <button class="tab-btn" data-tab="tab-gallery">📸 Page Gallery</button>
+      <button class="tab-btn" data-tab="tab-voice">🎙️ Voice Console</button>
+      <button class="tab-btn" data-tab="tab-diagnostics">🩺 Diagnostics</button>
+    </nav>
+
+    <!-- Global Telemetry Status Indicators -->
+    <div class="nav-telemetry-bar">
+      <div id="status-badge" class="status-pill">
+        <span class="status-dot"></span>
+        <span id="status-text">INITIALIZING</span>
+      </div>
+
+      <div class="stat-chip">
+        <span>Lang:</span>
+        <select id="global-lang-select" class="form-select" style="padding: 0.15rem 0.4rem; font-size: 0.78rem;">
+          <option value="en">English (en)</option>
+          <option value="ta">Tamil (ta)</option>
+          <option value="hi">Hindi (hi)</option>
+          <option value="kn">Kannada (kn)</option>
+          <option value="te">Telugu (te)</option>
+          <option value="ml">Malayalam (ml)</option>
+        </select>
+      </div>
+
+      <div class="stat-chip">
+        <span>Mode:</span>
+        <select id="global-mode-select" class="form-select" style="padding: 0.15rem 0.4rem; font-size: 0.78rem;">
+          <option value="preferred">Translate (Preferred)</option>
+          <option value="original">Original Script</option>
+        </select>
+      </div>
+
+      <div class="stat-chip">
+        <span>Uptime:</span>
+        <span id="uptime-display">00:00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="dashboard-container">
+
+    <!-- TAB 1: LIVE READING STATION -->
+    <section id="tab-station" class="tab-content active">
+      <div class="station-grid">
+        
+        <!-- Left: Live Camera Stream & Alignment HUD -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📹 Real-time Camera Stream</span>
+              <span class="card-badge">LIVE MJPEG</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button id="btn-toggle-camera" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;" title="Close/Open Camera">
+                <span>📷</span> Turn Off Camera
+              </button>
+              <div id="camera-fps-badge" class="card-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">30 FPS</div>
+            </div>
+          </div>
+
+          <div class="camera-container">
+            <img id="live-camera-feed" class="camera-stream" src="/api/camera/stream" alt="Live Camera Video Stream">
+            
+            <div id="camera-off-overlay" style="display: none; position: absolute; inset: 0; background: rgba(7, 10, 18, 0.94); backdrop-filter: blur(8px); flex-direction: column; align-items: center; justify-content: center; gap: 1rem; z-index: 10;">
+              <div style="font-size: 2.8rem;">📷</div>
+              <div style="font-weight: 700; font-size: 1.15rem; color: #fff;">Camera is Turned Off</div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; text-align: center;">Video acquisition is stopped to conserve CPU and energy.</p>
+              <button id="btn-turn-on-camera" class="btn btn-primary" style="padding: 0.6rem 1.4rem;">
+                <span>📷</span> Turn On Camera
+              </button>
+            </div>
+
+            <div class="camera-hud-overlay">
+              <div class="hud-top-row">
+                <span class="hud-badge">ROI: Active Target Box</span>
+                <span id="hud-alignment-status" class="hud-badge" style="color: var(--accent-cyan);">Detecting Alignment...</span>
+              </div>
+              <div class="hud-bottom-row">
+                <div id="hud-guidance-text" class="hud-guidance-pill">
+                  Align page within green bounding guide
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="stream-actions">
+            <button id="btn-scan-read" class="btn btn-primary">
+              <span>🔘</span> SCAN & READ BOOK [SPACE]
+            </button>
+            <button id="btn-refresh-stream" class="btn btn-secondary" title="Re-sync Stream">
+              <span>🔄</span> Re-Sync Feed
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Active Reading Stage & Synchronized Audio Player -->
+        <div class="glass-card active-reading-stage">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🔊 Active Speech Telemetry</span>
+            </div>
+            <div id="reading-book-pill" class="card-badge">Book: None</div>
+          </div>
+
+          <!-- Live Karaoke / Subtitle Highlight Box -->
+          <div class="karaoke-display">
+            <div id="karaoke-index" class="karaoke-sentence-index">Sentence: 0 / 0</div>
+            <div id="karaoke-text" class="karaoke-text empty-state">
+              Place a book in the camera view and click "Scan & Read Book" to extract text and begin listening.
+            </div>
+          </div>
+
+          <!-- Audio Waveform Visualizer Canvas -->
+          <canvas id="audio-waveform" class="audio-visualizer-canvas"></canvas>
+
+          <!-- Playback Controls -->
+          <div class="playback-controls-row">
+            <div class="ctrl-btn-group">
+              <button id="btn-ctrl-prev" class="ctrl-btn" title="Previous Sentence">⏮</button>
+              <button id="btn-ctrl-playpause" class="ctrl-btn ctrl-btn-lg" title="Play / Pause">⏸</button>
+              <button id="btn-ctrl-next" class="ctrl-btn" title="Next Sentence">⏭</button>
+              <button id="btn-ctrl-repeat" class="ctrl-btn" title="Repeat Current Sentence">🔄</button>
+              <button id="btn-ctrl-stop" class="ctrl-btn" title="Stop Reading" style="color: var(--accent-rose);">⏹</button>
+            </div>
+
+            <div class="volume-slider-group">
+              <span>🔊</span>
+              <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="80">
+              <span id="volume-label" style="font-family: var(--font-mono); min-width: 34px;">80%</span>
+            </div>
+          </div>
+
+          <!-- Page Sentence Breakdown List -->
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+              <span>PAGE SENTENCES QUEUE</span>
+              <span id="sentence-count-badge" style="font-family: var(--font-mono); color: var(--accent-cyan);">0 sentences</span>
+            </div>
+            <div id="sentence-flow-list" class="sentence-flow-list">
+              <div style="color: var(--text-dim); font-size: 0.82rem; padding: 0.5rem;">No active sentences loaded.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- TAB 2: MULTILINGUAL OCR & TRANSLATION STUDIO -->
+    <section id="tab-studio" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🌐 Multilingual Script & Translation Studio</span>
+          </div>
+          <div class="stat-chip">
+            <span>Detected Script:</span>
+            <span id="studio-detected-badge" style="color: var(--accent-cyan); font-weight: 700;">English (en)</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Test OCR sentence extraction, Unicode script identification, and neural translation across all 6 supported Indic languages.
+        </p>
+
+        <!-- Quick Sample Selector -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <span style="font-size: 0.82rem; color: var(--text-muted); align-self: center;">Quick Samples:</span>
+          <button class="btn btn-secondary sample-btn" data-sample="en" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">English</button>
+          <button class="btn btn-secondary sample-btn" data-sample="ta" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Tamil (தமிழ்)</button>
+          <button class="btn btn-secondary sample-btn" data-sample="hi" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Hindi (हिन्दी)</button>
+          <button class="btn btn-secondary sample-btn" data-sample="kn" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Kannada (ಕನ್ನಡ)</button>
+          <button class="btn btn-secondary sample-btn" data-sample="te" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Telugu (తెలుగు)</button>
+          <button class="btn btn-secondary sample-btn" data-sample="ml" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Malayalam (മലയാളം)</button>
+        </div>
+
+        <!-- Dual Pane Editor -->
+        <div class="dual-pane-grid">
+          <div class="text-pane-box">
+            <div class="pane-label">
+              <span>Original Recognized Text</span>
+              <span id="pane-orig-lang" style="color: var(--text-dim);">Source Script</span>
+            </div>
+            <textarea id="studio-input-text" class="pane-textarea" placeholder="Type or paste text in any supported language..."></textarea>
+            <button id="btn-studio-run" class="btn btn-primary" style="margin-top: 0.5rem;">
+              <span>⚡</span> Run Script Detection & Translate
+            </button>
+          </div>
+
+          <div class="text-pane-box">
+            <div class="pane-label">
+              <span>Translated Speech Output</span>
+              <div>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Target:</span>
+                <select id="studio-target-lang" class="form-select" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">
+                  <option value="en">English (en)</option>
+                  <option value="ta">Tamil (ta)</option>
+                  <option value="hi">Hindi (hi)</option>
+                  <option value="kn">Kannada (kn)</option>
+                  <option value="te">Telugu (te)</option>
+                  <option value="ml">Malayalam (ml)</option>
+                </select>
+              </div>
+            </div>
+            <textarea id="studio-translated-text" class="pane-textarea" readonly placeholder="Translation output will appear here..."></textarea>
+            <button id="btn-studio-speak" class="btn btn-accent" style="margin-top: 0.5rem;">
+              <span>🔊</span> Speak Translated Output
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 3: BOOK MEMORY LIBRARY -->
+    <section id="tab-library" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📚 Persistent Book Memory Library</span>
+          </div>
+          <button id="btn-refresh-books" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
+            <span>🔄</span> Refresh Library
+          </button>
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          VisionVoice automatically fingerprints books by vocabulary hashing and saves reading bookmarks persistently in <code>data/books/</code>.
+        </p>
+
+        <div id="books-cards-container" class="book-cards-grid">
+          <div style="color: var(--text-dim); padding: 1rem;">Loading book memory records...</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 4: PAGE CAPTURE GALLERY & CV INSPECTOR -->
+    <section id="tab-gallery" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📸 Captured Page Images & CV Preprocessing</span>
+          </div>
+          <button id="btn-refresh-gallery" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">
+            <span>🔄</span> Refresh Gallery
+          </button>
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Click any captured page to inspect full resolution, 4-corner perspective unwarping, and CLAHE contrast enhancement.
+        </p>
+
+        <div id="gallery-container" class="gallery-grid">
+          <div style="color: var(--text-dim); padding: 1rem;">Loading captures...</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 5: VOICE CONSOLE & EVENT STREAM -->
+    <section id="tab-voice" class="tab-content">
+      <div class="station-grid">
+        
+        <!-- Left: Spoken Utterance Simulator -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🎙️ Spoken Command Simulator</span>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Test speech recognition intent parsing and wake-phrase handling without physical microphone input.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <input type="text" id="voice-sim-input" class="pane-textarea" style="height: 48px;" placeholder="e.g. 'Hey VisionVoice', 'Start reading', 'Stop', 'Increase volume'...">
+            
+            <button id="btn-sim-voice" class="btn btn-primary">
+              <span>🗣️</span> Send Spoken Utterance
+            </button>
+          </div>
+
+          <!-- Quick Command Chips -->
+          <div style="margin-top: 1.25rem;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-dim); margin-bottom: 0.5rem;">QUICK TEST UTTERANCES:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+              <button class="btn btn-secondary voice-chip" data-cmd="hey visionvoice" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Hey VisionVoice"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="start reading" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Start reading"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="stop reading" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Stop reading"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="continue reading" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Continue reading"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="repeat" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Repeat"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="next sentence" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Next sentence"</button>
+              <button class="btn btn-secondary voice-chip" data-cmd="increase volume" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">"Increase volume"</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live System Event Stream -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📜 Real-Time System Event Log</span>
+            </div>
+            <button id="btn-clear-logs" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Clear</button>
+          </div>
+
+          <div id="system-logs-console" class="logs-console">
+            <div class="log-entry">
+              <span class="log-time">00:00:00</span>
+              <span class="log-cat">[SYSTEM]</span>
+              <span class="log-msg">Connecting to telemetry stream...</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- TAB 6: DIAGNOSTICS & SUBSYSTEM HEALTH -->
+    <section id="tab-diagnostics" class="tab-content">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🩺 Hardware & Subsystem Health Diagnostics</span>
+          </div>
+          <button id="btn-run-diag" class="btn btn-primary" style="padding: 0.45rem 1.25rem;">
+            <span>⚡</span> Run Full Self-Test Suite
+          </button>
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Verifies physical and emulated components: Camera Capture, USB Microphone, eSpeak-ng Audio Synthesis, ALSA plughw:3,0 Endpoints, GPIO Pull-up Buttons, and Status LED.
+        </p>
+
+        <div id="diag-cards-container" class="diag-grid">
+          <!-- Populated dynamically via JS -->
+          <div class="diag-card">
+            <div class="diag-info">
+              <div class="diag-name">📷 Camera Video Source</div>
+              <div class="diag-detail">Checking camera capture...</div>
+            </div>
+            <span class="diag-badge pass">CHECKING</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Dashboard JavaScript -->
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

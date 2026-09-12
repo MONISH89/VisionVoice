@@ -1,0 +1,353 @@
+2026-09-01 16:00:48,529 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 16:00:48,529 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 16:00:48,529 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 16:00:48,529 [ERROR] VisionVoice.Camera: OpenCV VideoCapture exception: 'NoneType' object has no attribute 'VideoCapture'
+2026-09-01 16:00:48,530 [ERROR] VisionVoice.Camera: Camera initialization failed: no hardware camera stream could be established.
+2026-09-01 16:00:48,530 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 16:00:48,530 [WARNING] VisionVoice.OCR: pytesseract module not found. Falling back to tesseract CLI or mock OCR.
+2026-09-01 16:00:48,530 [WARNING] VisionVoice.Translator: No third-party translation library available. Offline mock translation fallback enabled.
+2026-09-01 16:00:48,535 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 16:00:48,535 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 16:00:48,540 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_3c693bc4, page=1, sentence=3
+2026-09-01 16:00:48,540 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (No module named 'speech_recognition'). Fallback active.
+2026-09-01 16:00:48,540 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Fallback mode active.
+2026-09-01 16:00:48,540 [INFO] VisionVoice.Main: Shutting down VisionVoice...
+2026-09-01 16:00:48,540 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 16:00:48,568 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 16:00:48,568 [INFO] VisionVoice.VoiceControl: Voice controller stopped.
+2026-09-01 16:00:48,568 [INFO] VisionVoice.Main: VisionVoice shutdown complete.
+2026-09-01 16:01:52,860 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 16:01:52,860 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 16:01:52,860 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 16:01:52,860 [ERROR] VisionVoice.Camera: OpenCV VideoCapture exception: 'NoneType' object has no attribute 'VideoCapture'
+2026-09-01 16:01:52,860 [ERROR] VisionVoice.Camera: Camera initialization failed: no hardware camera stream could be established.
+2026-09-01 16:01:52,860 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 16:01:52,860 [WARNING] VisionVoice.OCR: pytesseract module not found. Falling back to tesseract CLI or mock OCR.
+2026-09-01 16:01:52,860 [WARNING] VisionVoice.Translator: No third-party translation library available. Offline mock translation fallback enabled.
+2026-09-01 16:01:52,864 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 16:01:52,864 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 16:01:52,869 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_3c693bc4, page=1, sentence=3
+2026-09-01 16:01:52,869 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (No module named 'speech_recognition'). Fallback active.
+2026-09-01 16:01:52,869 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Fallback mode active.
+2026-09-01 16:01:52,869 [INFO] VisionVoice.Main: Shutting down VisionVoice...
+2026-09-01 16:01:52,869 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 16:01:52,893 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 16:01:52,893 [INFO] VisionVoice.VoiceControl: Voice controller stopped.
+2026-09-01 16:01:52,893 [INFO] VisionVoice.Main: VisionVoice shutdown complete.
+2026-09-01 17:22:34,005 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:22:34,005 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:22:34,005 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:22:34,754 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:22:34,754 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:22:34,754 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:22:34,755 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:22:34,765 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:22:34,765 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:22:34,777 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:22:34,778 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:22:34,778 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:22:34,778 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:22:34,778 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:22:34,833 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:22:34,834 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:22:34,834 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:22:34,834 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:23:57,481 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:23:57,481 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:23:57,481 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:23:57,884 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:23:57,884 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:23:57,884 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:23:57,884 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:23:57,895 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:23:57,895 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:23:57,908 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:23:57,908 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:23:57,908 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:23:57,909 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:23:57,909 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:23:58,265 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:23:58,265 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:23:58,265 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:23:58,265 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:27:13,916 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:27:13,916 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:27:13,916 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:27:14,665 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:27:14,665 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:27:14,665 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:27:14,665 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:27:14,676 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:27:14,676 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:27:14,690 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:27:14,690 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:27:14,690 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:27:14,690 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:27:14,690 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:27:14,690 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:27:14,691 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:27:14,691 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:27:14,691 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:27:14,691 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:27:14,691 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:27:14,744 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:27:14,745 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:27:14,745 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:27:14,745 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:27:14,745 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:27:14,745 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:27:14,746 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-01 17:27:14,746 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:27:14,746 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:27:14,758 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:27:14,758 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:28:11,764 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:28:11,765 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:28:11,765 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:28:12,518 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:28:12,518 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:28:12,518 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:28:12,518 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:28:12,529 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:28:12,529 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:28:12,542 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:28:12,543 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:28:12,543 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:28:12,543 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:28:12,543 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:28:12,593 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:28:12,593 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:28:12,593 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:28:12,593 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:28:12,594 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:28:12,594 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:28:12,594 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-01 17:28:12,594 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:28:12,594 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:28:12,608 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:28:12,608 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:28:55,858 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:28:55,858 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:28:55,858 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:28:56,598 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:28:56,598 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:28:56,598 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:28:56,598 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:28:56,609 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:28:56,609 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:28:56,621 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:28:56,621 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:28:56,621 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:28:56,621 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:28:56,621 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:28:56,621 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:28:56,622 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:28:56,622 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:28:56,622 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:28:56,622 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:28:56,622 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:28:56,659 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-01 17:28:56,660 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:28:56,660 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:28:56,669 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:28:56,669 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:30:24,700 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-01 17:30:24,700 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-01 17:30:24,700 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-01 17:30:25,446 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-01 17:30:25,447 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-01 17:30:25,447 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:30:25,447 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:30:25,458 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:30:25,459 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-01 17:30:25,472 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-01 17:30:25,473 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:30:25,473 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:30:25,473 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-01 17:30:25,473 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-01 17:30:25,508 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-01 17:30:25,508 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-01 17:30:25,508 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-01 17:30:25,508 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-01 17:30:25,509 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-01 17:30:25,509 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-01 17:30:25,509 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-01 17:30:25,509 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-01 17:30:25,509 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-01 17:30:25,520 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-01 17:30:25,520 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:53:07,225 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-12 10:53:07,226 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-12 10:53:07,226 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-12 10:53:07,997 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-12 10:53:07,997 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-12 10:53:07,997 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:53:07,997 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:53:08,007 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:53:08,007 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:53:08,019 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-12 10:53:08,019 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:53:08,019 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:53:08,019 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-12 10:53:08,019 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-12 10:53:08,019 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-12 10:53:08,020 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-12 10:53:08,020 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-12 10:53:08,020 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-12 10:53:08,020 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-12 10:53:08,020 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-12 10:53:08,058 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-12 10:53:08,058 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-12 10:53:08,058 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-12 10:53:08,058 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-12 10:53:08,058 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:53:08,058 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:53:08,059 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-12 10:53:08,059 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:53:08,059 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:53:08,067 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:53:08,067 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:55:31,902 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-12 10:55:31,902 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-12 10:55:31,903 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-12 10:55:32,658 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-12 10:55:32,658 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-12 10:55:32,658 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:55:32,658 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:55:32,671 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:55:32,671 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:55:32,690 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-12 10:55:32,691 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:55:32,691 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:55:32,691 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-12 10:55:32,691 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-12 10:55:32,713 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-12 10:55:32,713 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-12 10:55:32,713 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-12 10:55:32,713 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-12 10:55:32,714 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:55:32,714 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:55:32,714 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-12 10:55:32,714 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:55:32,714 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:55:32,726 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:55:32,726 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:56:49,296 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-12 10:56:49,296 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-12 10:56:49,297 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-12 10:56:50,056 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-12 10:56:50,057 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-12 10:56:50,057 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:56:50,057 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:56:50,067 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:56:50,067 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:56:50,082 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-12 10:56:50,083 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:56:50,083 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:56:50,083 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-12 10:56:50,083 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-12 10:56:50,083 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-12 10:56:50,083 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-12 10:56:50,083 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-12 10:56:50,083 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-12 10:56:50,083 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-12 10:56:50,084 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-12 10:56:50,132 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-12 10:56:50,132 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-12 10:56:50,132 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-12 10:56:50,132 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-12 10:56:50,133 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:56:50,133 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:56:50,133 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-12 10:56:50,135 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:56:50,135 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:56:50,148 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:56:50,148 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:59:47,272 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-12 10:59:47,272 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-12 10:59:47,272 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-12 10:59:48,368 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-12 10:59:48,368 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-12 10:59:48,395 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 10:59:48,500 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 10:59:48,511 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 10:59:48,511 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 10:59:48,525 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-12 10:59:48,541 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 10:59:48,541 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 10:59:48,541 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-12 10:59:48,541 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-12 10:59:48,541 [INFO] VisionVoice.Main: Starting VisionVoice application services...
+2026-09-12 10:59:48,541 [INFO] VisionVoice.VoiceControl: Voice controller serialized background listening thread started.
+2026-09-12 10:59:48,541 [INFO] VisionVoice.Buttons: Hardware button controller & LED indication thread started.
+2026-09-12 10:59:48,542 [INFO] VisionVoice.Main: FSM State Transition: 'BOOT' -> 'WAIT_WAKE_WORD'
+2026-09-12 10:59:48,542 [INFO] VisionVoice.Speech: TTS: generating speech
+2026-09-12 10:59:49,081 [INFO] VisionVoice.Speech: TTS: playing through afplay
+2026-09-12 10:59:56,542 [INFO] VisionVoice.Speech: TTS: playback complete
+2026-09-12 13:44:10,132 [INFO] VisionVoice.Main: Initializing VisionVoice v1.0.0...
+2026-09-12 13:44:10,132 [INFO] VisionVoice.Camera: Initializing headless camera subsystem...
+2026-09-12 13:44:10,132 [WARNING] VisionVoice.Camera: Picamera2 unavailable (No module named 'picamera2'). Attempting OpenCV VideoCapture on index 0...
+2026-09-12 13:44:10,915 [INFO] VisionVoice.Camera: OpenCV VideoCapture opened on index 0.
+2026-09-12 13:44:10,915 [INFO] VisionVoice.Camera: Camera background frame acquisition thread started.
+2026-09-12 13:44:10,915 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 13:44:10,915 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 13:44:10,927 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 13:44:10,927 [INFO] VisionVoice.Speech: System volume set to 80%
+2026-09-12 13:44:10,944 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=0
+2026-09-12 13:44:10,944 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 13:44:10,944 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 13:44:10,944 [WARNING] VisionVoice.Buttons: RPi.GPIO hardware initialization unavailable (No module named 'RPi'). Running in fallback mode.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Main: Signal handlers registered for SIGINT & SIGTERM.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Main: Graceful shutdown sequence initiated...
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Main: Reading session saved at page 1, sentence 2.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Main: TTS audio playback terminated and sound endpoints released.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.VoiceControl: Voice controller stopped and microphone resources released.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Main: Voice recognition listener stopped and microphone released.
+2026-09-12 13:44:10,945 [INFO] VisionVoice.Camera: Releasing camera resources...
+2026-09-12 13:44:10,974 [INFO] VisionVoice.Camera: Camera resources released successfully.
+2026-09-12 13:44:10,974 [INFO] VisionVoice.Main: Camera capture hardware released.
+2026-09-12 13:44:10,974 [INFO] VisionVoice.Main: Status LED turned off and GPIO pins cleaned up.
+2026-09-12 13:44:10,974 [INFO] VisionVoice.Main: VisionVoice shutdown complete. All hardware resources cleanly released.
+2026-09-12 13:44:10,975 [INFO] VisionVoice.OCR: pytesseract module imported successfully.
+2026-09-12 13:44:10,975 [INFO] VisionVoice.Translator: Translation backend: deep_translator ready.
+2026-09-12 13:44:10,975 [INFO] VisionVoice.Memory: Loaded existing session: book_id=book_9ceacd78, page=1, last_processed=1, sentence=2
+2026-09-12 13:44:10,976 [WARNING] VisionVoice.VoiceControl: Microphone list query exception (Could not find PyAudio; check installation). Initializing sr.Microphone(device_index=2)
+2026-09-12 13:44:10,976 [WARNING] VisionVoice.VoiceControl: SpeechRecognition initialization warning (Could not find PyAudio; check installation). Fallback active.
+2026-09-12 13:44:10,989 [INFO] VisionVoice.Speech: Development audio player fallback: 'afplay'
+2026-09-12 13:44:10,990 [INFO] VisionVoice.Speech: System volume set to 80%

@@ -1,0 +1,21 @@
+# Core Computer Vision & Image Processing
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Multilingual OCR
+pytesseract>=0.3.10
+
+# Text-to-Speech & Speech Recognition
+gTTS>=2.4.0
+pyttsx3>=2.90
+SpeechRecognition>=3.10.0
+pyaudio>=0.2.14
+
+# Multilingual Translation & Language Detection
+deep-translator>=1.11.4
+googletrans==4.0.0-rc1
+langdetect>=1.0.9
+
+# Raspberry Pi Hardware Drivers (Installed automatically on Pi OS)
+# RPi.GPIO>=0.7.1
+# picamera2

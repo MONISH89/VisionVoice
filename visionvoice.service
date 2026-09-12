@@ -1,0 +1,18 @@
+[Unit]
+Description=VisionVoice Smart Hands-Free Assistive Reading Assistant
+After=network.target sound.target alsa-restore.service systemd-udevd.service
+Wants=sound.target
+
+[Service]
+Type=simple
+User=%I
+WorkingDirectory=/opt/VisionVoice
+ExecStart=/opt/VisionVoice/.venv/bin/python main.py
+Restart=always
+RestartSec=3s
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

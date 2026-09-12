@@ -1,0 +1,30 @@
+{
+  "book_id": "book_8c946b4a",
+  "detected_lang": "en",
+  "created_at": 1789200902.313696,
+  "last_page": 1,
+  "last_sentence_idx": 2,
+  "fingerprints": [
+    "878fe03b99661cc72c5fe1df7120a03f",
+    "9ea043307f9e7722cff764bee237072b"
+  ],
+  "sample_words": [
+    "device",
+    "assistive",
+    "books.",
+    "multilingual",
+    "real-time",
+    "ocr,",
+    "designed",
+    "reading",
+    "vision,",
+    "analysis,",
+    "computer",
+    "alignment",
+    "physical",
+    "combines",
+    "intelligent",
+    "visionvoice"
+  ],
+  "pages_read": 1
+}

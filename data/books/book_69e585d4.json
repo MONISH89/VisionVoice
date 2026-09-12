@@ -1,0 +1,23 @@
+{
+  "book_id": "book_69e585d4",
+  "detected_lang": "en",
+  "created_at": 1788067539.642782,
+  "last_page": 1,
+  "last_sentence_idx": 0,
+  "fingerprints": [
+    "3f372d2b075c3d3e28d2c2aee900af83"
+  ],
+  "sample_words": [
+    "describes",
+    "particles.",
+    "scale",
+    "atoms",
+    "quantum",
+    "subatomic",
+    "physical",
+    "nature",
+    "mechanics",
+    "properties"
+  ],
+  "pages_read": 1
+}

@@ -1,0 +1,27 @@
+{
+  "book_id": "book_3c693bc4",
+  "detected_lang": "en",
+  "created_at": 1788067539.642186,
+  "last_page": 1,
+  "last_sentence_idx": 3,
+  "fingerprints": [
+    "b67a23ca2b61e51b11d762d727ec85d7",
+    "a5f459ea876dc8eddf825398dc7e0363"
+  ],
+  "sample_words": [
+    "every",
+    "scholar",
+    "upon",
+    "lived",
+    "once",
+    "evening.",
+    "mysterious",
+    "loved",
+    "reading",
+    "physical",
+    "forest",
+    "books",
+    "time"
+  ],
+  "pages_read": 1
+}
